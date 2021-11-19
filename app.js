@@ -4,6 +4,7 @@ import {modelView, loadMatrix, multRotationY, multScale, multTranslation, popMat
 
 import * as SPHERE from '../../libs/sphere.js';
 import * as CUBE from '../../libs/cube.js';
+import { vec4 } from "./libs/MV.js";
 
 /** @type WebGLRenderingContext */
 let gl;
@@ -82,37 +83,11 @@ function setup(shaders)
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(modelView()));
     }
 
-    function Sun()
-    {
-        // Don't forget to scale the sun, rotate it around the y axis at the correct speed
-        multScale([SUN_DIAMETER, SUN_DIAMETER, SUN_DIAMETER]);
-        multRotationY(360*time/SUN_DAY);
-
-        // Send the current modelview matrix to the vertex shader
-        uploadModelView();
-
-        // Draw a sphere representing the sun
-        SPHERE.draw(gl, program, mode);
-    }
-
-
-    function Mercury()
-    {
-        multScale([MERCURY_DIAMETER, MERCURY_DIAMETER, MERCURY_DIAMETER]);
-        multRotationY(360*time/MERCURY_DAY);
-
-        // Send the current modelview matrix to the vertex shader
-        uploadModelView();
-
-        // Draw a sphere 
-        SPHERE.draw(gl, program, mode);
-    }
-
 
     function ground(){
         multScale([SQUARE_LENGTH, 1, SQUARE_LENGTH]);
         uploadModelView();
-        
+
         CUBE.draw(gl, program, mode);
     }
 
@@ -130,21 +105,24 @@ function setup(shaders)
     
         loadMatrix(lookAt([VP_DISTANCE,VP_DISTANCE,VP_DISTANCE], [0,0,0], [0,1,0]));
         
+
         pushMatrix();
 
-        multTranslation([-GROUND_X, 0, -GROUND_Z]);
+        multTranslation([-GROUND_X, 0, -GROUND_Z]);        
 
+        const fColor = gl.getUniformLocation(program, "fColor");
+        
         for(let z = 0; z < 2*GROUND_Z/SQUARE_LENGTH; z++){
             pushMatrix()
             for(let x = 0; x < 2*GROUND_X/SQUARE_LENGTH; x++){
-                pushMatrix()
+                pushMatrix();
+                ((z+x)%2 == 0) ? gl.uniform4f(fColor, 0.7, 0.0, 0.0, 1.0) : gl.uniform4f(fColor, 1.0, 1.0, 1.0, 1.0);
                 ground();
                 popMatrix();
                 multTranslation([SQUARE_LENGTH, 0, 0]);
             }
             popMatrix()
-            multTranslation([0, 0, SQUARE_LENGTH]);
-            
+            multTranslation([0, 0, SQUARE_LENGTH]); 
         }
 
 
