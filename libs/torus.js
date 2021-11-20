@@ -20,7 +20,7 @@ let edges_buffer;
 var torus_PPD=30;
 var torus_DISKS=30;
 var torus_DISK_RADIUS = 0.2;
-var torus_RADIUS = 0.5;
+var torus_RADIUS = 0.5;     
 
 function init(gl, ppd=torus_PPD, nd=torus_DISKS, big_r = torus_RADIUS, small_r = torus_DISK_RADIUS) {
     _build(torus_PPD, torus_DISKS, big_r, small_r);
