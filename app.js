@@ -1,9 +1,12 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
 import { ortho, lookAt, flatten } from "../../libs/MV.js";
-import {modelView, loadMatrix, multRotationY, multScale, multTranslation, popMatrix, pushMatrix} from "../../libs/stack.js";
+import {modelView, loadMatrix, multRotationX, multRotationY, multRotationZ, multScale, multTranslation, popMatrix, pushMatrix} from "../../libs/stack.js";
 
 import * as SPHERE from '../../libs/sphere.js';
 import * as CUBE from '../../libs/cube.js';
+import * as TORUS from '../../libs/torus.js';
+
+
 import { vec4 } from "./libs/MV.js";
 
 /** @type WebGLRenderingContext */
@@ -15,11 +18,22 @@ let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 let animation = true;   // Animation is running
 
 
-const SQUARE_LENGTH = 10;
-const GROUND_X = 100;
-const GROUND_Z = 100;
+//Ground
+const SQUARE_LENGTH = 1;
+const GROUND_X = 10;
+const GROUND_Z = 10;
 
-const VP_DISTANCE = 100;
+//Wheels
+const WHEEL_DIAMETER = 1;
+const WHEELS_X_DISTANCE = WHEEL_DIAMETER + 0.5;
+const WHEELS_Z_DISTANCE = 2;
+
+
+
+
+
+const VP_DISTANCE = 5;
+
 
 
 
@@ -59,9 +73,10 @@ function setup(shaders)
         }
     }
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+    gl.clearColor(0.71875, 0.83984375, 0.91015625, 1.0);
     SPHERE.init(gl);
     CUBE.init(gl);
+    TORUS.init(gl);
     gl.enable(gl.DEPTH_TEST);   // Enables Z-buffer depth test
     
     window.requestAnimationFrame(render);
@@ -85,11 +100,48 @@ function setup(shaders)
 
 
     function ground(){
-        multScale([SQUARE_LENGTH, 1, SQUARE_LENGTH]);
+        multScale([SQUARE_LENGTH, 0, SQUARE_LENGTH]);
         uploadModelView();
 
         CUBE.draw(gl, program, mode);
     }
+
+
+    
+
+    function wheels(){
+        
+        pushMatrix();
+        
+        multTranslation([(-1.5 * WHEELS_X_DISTANCE) - (1.5 * WHEEL_DIAMETER), WHEEL_DIAMETER/2, -WHEELS_Z_DISTANCE/2]);
+        for(let i = 0; i < 2; i++){
+            pushMatrix();
+
+            for(let j = 0; j < 4; j++){
+                pushMatrix();
+
+                multRotationX(90);
+                multScale([1, WHEEL_DIAMETER, 1]); 
+                uploadModelView();
+                TORUS.draw(gl, program, mode);
+
+                popMatrix();
+
+                multTranslation([WHEELS_X_DISTANCE, 0, 0]);
+            }
+
+            popMatrix();
+            multTranslation([0, 0, WHEELS_Z_DISTANCE]);
+        }
+
+        popMatrix();
+        
+    }
+
+
+
+
+
 
 
     function render()
@@ -108,25 +160,35 @@ function setup(shaders)
 
         pushMatrix();
 
-        multTranslation([-GROUND_X, 0, -GROUND_Z]);        
-
         const fColor = gl.getUniformLocation(program, "fColor");
-        
+
+        multTranslation([-GROUND_X, 0, -GROUND_Z]);  
+
         for(let z = 0; z < 2*GROUND_Z/SQUARE_LENGTH; z++){
-            pushMatrix()
+            pushMatrix();
             for(let x = 0; x < 2*GROUND_X/SQUARE_LENGTH; x++){
                 pushMatrix();
-                ((z+x)%2 == 0) ? gl.uniform4f(fColor, 0.7, 0.0, 0.0, 1.0) : gl.uniform4f(fColor, 1.0, 1.0, 1.0, 1.0);
+                ((z+x)%2 == 0) ? gl.uniform4f(fColor, 0.0, 0.3, 0.0, 1.0) : gl.uniform4f(fColor, 0.0, 0.4, 0.0, 1.0);
                 ground();
                 popMatrix();
                 multTranslation([SQUARE_LENGTH, 0, 0]);
             }
-            popMatrix()
+            popMatrix();
             multTranslation([0, 0, SQUARE_LENGTH]); 
         }
-
-
         popMatrix();
+
+        gl.uniform4f(fColor, 0.15, 0.15, 0.15, 1.0);
+        wheels();
+
+
+
+
+
+
+
+
+
 
     
     }
