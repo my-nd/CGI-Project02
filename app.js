@@ -31,10 +31,16 @@ const GROUND_Z = 10;
 const GROUND_WIDTH = 0.1;
 
 //Wheels
-const WHEEL_RADIUS = 0.3;
-const WHEEL_WIDTH = 0.5;
+const WHEEL_RADIUS = 0.4;
+const WHEEL_WIDTH = 0.6;
 const WHEELS_X_DISTANCE = (WHEEL_RADIUS * 2) + 0.2;
 const WHEELS_Z_DISTANCE = 2.0;
+
+//Body
+const BODY_HEIGHT = 1;
+const BODY_LENGTH = WHEELS_X_DISTANCE * 3 * 1.1;
+const BODY_WIDTH = WHEELS_Z_DISTANCE - WHEEL_WIDTH/2;
+const BODY_ELEVATION = WHEEL_RADIUS * 1.7;
 
 
 
@@ -151,7 +157,7 @@ function setup(shaders)
         for(let z = 0; z < 2*GROUND_Z/SQUARE_LENGTH; z++){
             pushMatrix();   
             for(let x = 0; x < 2*GROUND_X/SQUARE_LENGTH; x++){
-                ((z+x)%2 == 0) ? gl.uniform4f(fColor, 0.0, 0.5, 0.0, 1.0) : gl.uniform4f(fColor, 0.0, 0.6, 0.0, 1.0);
+                ((z+x)%2 == 0) ? gl.uniform4f(fColor, 0.390625, 0.2734375, 0.140625, 1.0) : gl.uniform4f(fColor, 0.5, 0.3515625, 0.2734375, 1.0);
                 tile();
                 multTranslation([SQUARE_LENGTH, 0, 0]);
             }
@@ -165,7 +171,7 @@ function setup(shaders)
     function wheels(){
 
         pushMatrix(); 
-        
+
         multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, -WHEELS_Z_DISTANCE / 2]);
         for(let i = 0; i < 2; i++){
             pushMatrix();
@@ -173,9 +179,10 @@ function setup(shaders)
             for(let j = 0; j < 4; j++){ 
                 gl.uniform4f(fColor, 0.15, 0.15, 0.15, 1.0); 
                 tire();
+
                 gl.uniform4f(fColor, 0.3, 0.3, 0.3, 1.0);
                 rim();
-                
+
                 if(i == 0){
                     gl.uniform4f(fColor, 0.4, 0.4, 0.4, 1.0);
                     pushMatrix();
@@ -184,14 +191,33 @@ function setup(shaders)
                     axles();
 
                     popMatrix();
-                } 
+
+                    gl.uniform4f(fColor, 0.5, 0.1, 0.32, 1.0);
+                    wheelArmor(-90);
+                }
+                else {
+                    gl.uniform4f(fColor, 0.5, 0.1, 0.32, 1.0);
+                    wheelArmor(90);
+                }
                 multTranslation([WHEELS_X_DISTANCE, 0, 0]);
 
-                
+
             }
             popMatrix();
             multTranslation([0, 0, WHEELS_Z_DISTANCE]);
         }
+
+        popMatrix();
+    }
+function wheelArmor(angle) {
+        pushMatrix();
+
+        multScale([(0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, (0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, 0.3]);
+        multRotationX(angle);
+        multTranslation([0, (WHEEL_RADIUS+WHEEL_WIDTH)/2, 0]);
+
+        uploadModelView();
+        PYRAMID.draw(gl, program, mode);
 
         popMatrix();
     }
@@ -229,7 +255,6 @@ function setup(shaders)
 
 
     function axles(){
-
         pushMatrix();
 
         multScale([0.1, 0.1, WHEELS_Z_DISTANCE]);
@@ -242,16 +267,28 @@ function setup(shaders)
 
 
     function body(){
+        pushMatrix();
 
-        multScale([WHEELS_X_DISTANCE*3*1.1, 1, WHEELS_Z_DISTANCE - WHEEL_WIDTH]);
-
-
+        multScale([BODY_LENGTH, BODY_HEIGHT, BODY_WIDTH]);
+        multTranslation([0, BODY_ELEVATION, 0]);  
         uploadModelView();
         CUBE.draw(gl, program, mode);
 
-
+        popMatrix();
     }
 
+    function hatch(){
+        pushMatrix();
+
+        multTranslation([-WHEELS_X_DISTANCE+0.2, BODY_ELEVATION+0.5, 0]);
+        multScale([BODY_LENGTH * 0.5, 1.3, BODY_WIDTH]);
+        
+        uploadModelView();
+        SPHERE.draw(gl, program, mode);
+
+        popMatrix();
+
+    }
 
 
 
@@ -272,8 +309,11 @@ function setup(shaders)
         ground();                                                                                       
 
         wheels();
-
+        gl.uniform4f(fColor, 0, 0.2, 0, 1.0); 
         body();
+
+        gl.uniform4f(fColor, 0, 0.4, 0, 1.0); 
+        hatch();
 
 
 
