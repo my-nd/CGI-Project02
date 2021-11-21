@@ -31,14 +31,14 @@ const GROUND_Z = 5;
 const GROUND_WIDTH = 0.1;
 
 //Wheels
-const WHEEL_DIAMETER = 0.7;
+const WHEEL_RADIUS = 0.3;
 const WHEEL_WIDTH = 1;
-const WHEELS_X_DISTANCE = WHEEL_DIAMETER + 0.5;
+const WHEELS_X_DISTANCE = WHEEL_RADIUS * 2 + 0.1;
 const WHEELS_Z_DISTANCE = 2.5;
 
 
 
-const VP_DISTANCE = 8;
+const VP_DISTANCE = 6;
 let camX = VP_DISTANCE, camY = VP_DISTANCE, camZ = VP_DISTANCE;
 
 
@@ -144,7 +144,7 @@ function setup(shaders)
 
         pushMatrix(); 
         
-        multTranslation([(-1.5 * WHEELS_X_DISTANCE), WHEEL_DIAMETER/1.4, -WHEELS_Z_DISTANCE/2]);
+        multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, -WHEELS_Z_DISTANCE / 2]);
         for(let i = 0; i < 2; i++){
             pushMatrix();
 
@@ -165,9 +165,11 @@ function setup(shaders)
     function tire(){
         pushMatrix();
 
-        multRotationX(90);
-        multScale([WHEEL_DIAMETER, 1, WHEEL_DIAMETER]); 
         
+        multScale([(WHEEL_RADIUS * 2) / 1.4, (WHEEL_RADIUS * 2) / 1.4, WHEEL_WIDTH]); 
+        multRotationX(90);  
+        //1.4 is the initial diameter of the torus 
+        //(TORUS_DISK_DIAMETER + TORUS_DIAMETER)
         uploadModelView();
         TORUS.draw(gl, program, mode);
 
@@ -177,8 +179,14 @@ function setup(shaders)
     function rim(){
         pushMatrix();
 
-        multRotationX(90);  
-        multScale([0.4 * WHEEL_DIAMETER, 1, 0.4 * WHEEL_DIAMETER]);
+        
+        multScale( [(0.6/1.4) * WHEEL_RADIUS * 2, (0.6/1.4) * WHEEL_RADIUS * 2, WHEEL_WIDTH*0.4] ); 
+        multRotationX(90); 
+
+        // 0.6/1.4 comes from the relation of the inner circle 
+        // of the torus vs the outer circle 
+        // innerCircle = (0.6/1.4) * outterCircle
+
         uploadModelView();
         CYLINDER.draw(gl, program, mode);
 
