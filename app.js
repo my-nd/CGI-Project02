@@ -25,9 +25,10 @@ Each unit corresponds to 1 meter.
 */
 
 //Ground
-const SQUARE_LENGTH = 1;
-const GROUND_X = 10;
-const GROUND_Z = 10;
+const SQUARE_LENGTH = 0.5;
+const GROUND_X = 5;
+const GROUND_Z = 5;
+const GROUND_WIDTH = 0.1;
 
 //Wheels
 const WHEEL_DIAMETER = 0.7;
@@ -37,7 +38,7 @@ const WHEELS_Z_DISTANCE = 2.5;
 
 
 
-const VP_DISTANCE = 5;
+const VP_DISTANCE = 8;
 let camX = VP_DISTANCE, camY = VP_DISTANCE, camZ = VP_DISTANCE;
 
 
@@ -106,15 +107,14 @@ function setup(shaders)
         mProjection = ortho(-VP_DISTANCE*aspect,VP_DISTANCE*aspect, -VP_DISTANCE, VP_DISTANCE,-3*VP_DISTANCE,3*VP_DISTANCE);
     }
 
-    function uploadModelView()
-    {
+    function uploadModelView(){
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mModelView"), false, flatten(modelView()));
     }
 
     function tile(){
         pushMatrix();
 
-        multScale([SQUARE_LENGTH, 0, SQUARE_LENGTH]);
+        multScale([SQUARE_LENGTH, GROUND_WIDTH, SQUARE_LENGTH]);
         uploadModelView();
         CUBE.draw(gl, program, mode);
 
@@ -124,13 +124,13 @@ function setup(shaders)
     function ground(){
         pushMatrix();
 
-        multTranslation([-GROUND_X, 0, -GROUND_Z]);  
+        multTranslation([-GROUND_X, -GROUND_WIDTH/2, -GROUND_Z]);  
 
         for(let z = 0; z < 2*GROUND_Z/SQUARE_LENGTH; z++){
-            pushMatrix();
+            pushMatrix();   
             for(let x = 0; x < 2*GROUND_X/SQUARE_LENGTH; x++){
-                ((z+x)%2 == 0) ? gl.uniform4f(fColor, 0.0, 0.3, 0.0, 1.0) : gl.uniform4f(fColor, 0.0, 0.4, 0.0, 1.0);
-                tile()
+                ((z+x)%2 == 0) ? gl.uniform4f(fColor, 0.0, 0.5, 0.0, 1.0) : gl.uniform4f(fColor, 0.0, 0.6, 0.0, 1.0);
+                tile();
                 multTranslation([SQUARE_LENGTH, 0, 0]);
             }
             popMatrix();
@@ -144,7 +144,7 @@ function setup(shaders)
 
         pushMatrix(); 
         
-        multTranslation([(-1.5 * WHEELS_X_DISTANCE), WHEEL_DIAMETER/2, -WHEELS_Z_DISTANCE/2]);
+        multTranslation([(-1.5 * WHEELS_X_DISTANCE), WHEEL_DIAMETER/1.4, -WHEELS_Z_DISTANCE/2]);
         for(let i = 0; i < 2; i++){
             pushMatrix();
 
