@@ -42,6 +42,10 @@ const BODY_LENGTH = WHEELS_X_DISTANCE * 3 * 1.1;
 const BODY_WIDTH = WHEELS_Z_DISTANCE - WHEEL_WIDTH/2;
 const BODY_ELEVATION = WHEEL_RADIUS * 1.7;
 
+//Hatch
+const HATCH_CENTER_X = -WHEELS_X_DISTANCE + 0.2;
+const HATCH_CENTER_Y = BODY_ELEVATION + 0.5;    
+
 
 
 const VP_DISTANCE = 6;
@@ -269,26 +273,85 @@ function wheelArmor(angle) {
     function body(){
         pushMatrix();
 
-        multScale([BODY_LENGTH, BODY_HEIGHT, BODY_WIDTH]);
-        multTranslation([0, BODY_ELEVATION, 0]);  
-        uploadModelView();
-        CUBE.draw(gl, program, mode);
-
+            multScale([BODY_LENGTH, BODY_HEIGHT, BODY_WIDTH]);
+            multTranslation([0, BODY_ELEVATION, 0]);
+            uploadModelView();
+            CUBE.draw(gl, program, mode);
         popMatrix();
-    }
 
+        pushMatrix();
+            frontAndRear();
+        popMatrix();
+
+
+    }
     function hatch(){
         pushMatrix();
 
-        multTranslation([-WHEELS_X_DISTANCE+0.2, BODY_ELEVATION+0.5, 0]);
+        multTranslation([HATCH_CENTER_X, HATCH_CENTER_Y, 0]);
         multScale([BODY_LENGTH * 0.5, 1.3, BODY_WIDTH]);
         
         uploadModelView();
         SPHERE.draw(gl, program, mode);
 
         popMatrix();
+    }
+
+    function cannon(){
+
+        pushMatrix();
+
+        multTranslation([HATCH_CENTER_X + 1, HATCH_CENTER_Y + 1 , 0]);
+        multRotationZ(-45);
+        multScale([0.2, 2.5, 0.2]);
+
+        uploadModelView();
+        CYLINDER.draw(gl, program, mode);
+
+        popMatrix();
+    }
+
+    function cannon1(){
+        pushMatrix();
+
+        multTranslation([HATCH_CENTER_X + 1, HATCH_CENTER_Y + 1 , 0]);
+        multRotationZ(-45);
+        multScale([0.2, 7, 0.2]);
+
+        uploadModelView();
+        TORUS.draw(gl, program, mode);
+
+        popMatrix();
+    }
+
+    function frontAndRear() {
+        pushMatrix();
+            multTranslation([0.36+(BODY_LENGTH/2), BODY_ELEVATION, 0]);
+            multScale([1.5*BODY_HEIGHT/2, 1, BODY_WIDTH]);
+
+            multRotationZ(-90);
+            uploadModelView();
+            PYRAMID.draw(gl, program, mode);
+        popMatrix();
+
+        pushMatrix();
+            multTranslation([-0.36-(BODY_LENGTH/2), BODY_ELEVATION, 0]);
+            multScale([1.5 *BODY_HEIGHT/2, 1, BODY_WIDTH]);
+
+            multRotationZ(90);
+            uploadModelView();
+            PYRAMID.draw(gl, program, mode);
+        popMatrix();
+    }
+
+    function sideSkirts(){
 
     }
+
+    function tank(){
+
+    }
+
 
 
 
@@ -307,22 +370,15 @@ function wheelArmor(angle) {
         
 
         ground();                                                                                       
-
-        wheels();
         gl.uniform4f(fColor, 0, 0.2, 0, 1.0); 
         body();
+        wheels();
+        
 
         gl.uniform4f(fColor, 0, 0.4, 0, 1.0); 
         hatch();
-
-
-
-
-
-
-
-
-
+        gl.uniform4f(fColor, 0, 0.2, 0, 1.0); 
+        cannon1();
 
     
     }
