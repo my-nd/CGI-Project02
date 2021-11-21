@@ -26,15 +26,15 @@ Each unit corresponds to 1 meter.
 
 //Ground
 const SQUARE_LENGTH = 0.5;
-const GROUND_X = 5;
-const GROUND_Z = 5;
+const GROUND_X = 10;
+const GROUND_Z = 10;
 const GROUND_WIDTH = 0.1;
 
 //Wheels
 const WHEEL_RADIUS = 0.3;
-const WHEEL_WIDTH = 1;
-const WHEELS_X_DISTANCE = WHEEL_RADIUS * 2 + 0.1;
-const WHEELS_Z_DISTANCE = 2.5;
+const WHEEL_WIDTH = 0.5;
+const WHEELS_X_DISTANCE = (WHEEL_RADIUS * 2) + 0.2;
+const WHEELS_Z_DISTANCE = 2.0;
 
 
 
@@ -153,7 +153,19 @@ function setup(shaders)
                 tire();
                 gl.uniform4f(fColor, 0.3, 0.3, 0.3, 1.0);
                 rim();
+                
+                if(i == 0){
+                    gl.uniform4f(fColor, 0.4, 0.4, 0.4, 1.0);
+                    pushMatrix();
+
+                    multTranslation([0, 0, WHEELS_Z_DISTANCE/2]);
+                    axles();
+
+                    popMatrix();
+                } 
                 multTranslation([WHEELS_X_DISTANCE, 0, 0]);
+
+                
             }
             popMatrix();
             multTranslation([0, 0, WHEELS_Z_DISTANCE]);
@@ -197,25 +209,24 @@ function setup(shaders)
     function axles(){
 
         pushMatrix();
-        //multTranslation([]);
-        for(let i = 0; i < 4; i++){
-            pushMatrix();
 
-            multScale([0.5, 0.5, WHEELS_Z_DISTANCE]);
-            multRotationX(90);  
-            uploadModelView();
-            CYLINDER.draw(gl, program, mode);
-
-            popMatrix();
-            
-            
-        }
+        multScale([0.1, 0.1, WHEELS_Z_DISTANCE]);
+        multRotationX(90);  
+        uploadModelView();
+        CYLINDER.draw(gl, program, mode);
         
         popMatrix();
     }
 
 
-    function shaft(){
+    function body(){
+
+        multScale([WHEELS_X_DISTANCE*3*1.1, 1, WHEELS_Z_DISTANCE - WHEEL_WIDTH]);
+
+
+        uploadModelView();
+        CUBE.draw(gl, program, mode);
+
 
     }
 
@@ -239,6 +250,8 @@ function setup(shaders)
         ground();
 
         wheels();
+
+        body();
 
 
 
