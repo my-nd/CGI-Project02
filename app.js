@@ -40,6 +40,8 @@ const WHEELS_Z_DISTANCE = 2.0;
 
 const VP_DISTANCE = 6;
 let camX = VP_DISTANCE, camY = VP_DISTANCE, camZ = VP_DISTANCE;
+let upZ = 0;
+
 
 
 
@@ -78,9 +80,29 @@ function setup(shaders)
             case '-':
                 if(animation) speed /= 1.1;
                 break;
-            case "3":
+            case '1':
+                camX = -VP_DISTANCE;
                 camY = 0;
+                camZ = 0;
+                upZ = 0;
+                break;
+            case '2':
                 camX = 0;
+                camY = VP_DISTANCE;
+                camZ = 0;
+                upZ = 1;
+                break;
+            case '3':
+                camX = 0;
+                camY = 0;
+                camZ = VP_DISTANCE;
+                upZ = 0;
+                break;
+            case '4':
+                camX = VP_DISTANCE;
+                camY = VP_DISTANCE;
+                camZ = VP_DISTANCE;
+                upZ = 0;
                 break;
         }
     }
@@ -244,10 +266,10 @@ function setup(shaders)
         
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
     
-        loadMatrix(lookAt([camX, camY, camZ], [0,0,0], [0,1,0]));
+        loadMatrix(lookAt([camX, camY, camZ], [0,0,0], [0,1,upZ]));
         
 
-        ground();
+        ground();                                                                                       
 
         wheels();
 
