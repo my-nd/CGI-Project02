@@ -48,9 +48,16 @@ const HATCH_CENTER_Y = BODY_ELEVATION + 0.5;
 
 
 
+let tankXTranslation = 0;
+let wheelsRotation = 0;
+
+
+
 const VP_DISTANCE = 6;
 let camX = VP_DISTANCE, camY = VP_DISTANCE, camZ = VP_DISTANCE;
 let upZ = 0;
+
+
 
 
 
@@ -114,15 +121,25 @@ function setup(shaders)
                 camZ = VP_DISTANCE;
                 upZ = 0;
                 break;
+            case "ArrowUp":
+                tankXTranslation -= 0.05;
+                wheelsRotation += (360*0.05) / (2*Math.PI * WHEEL_RADIUS);
+                break;
+            case "ArrowDown":
+                tankXTranslation += 0.05;
+                wheelsRotation -= (360*0.05) / (2*Math.PI * WHEEL_RADIUS);
+                break;
         }
     }
 
     gl.clearColor(0.71875, 0.83984375, 0.91015625, 1.0);
+    
     SPHERE.init(gl);
     CUBE.init(gl);
     TORUS.init(gl);
     CYLINDER.init(gl);
     PYRAMID.init(gl);
+
     gl.enable(gl.DEPTH_TEST);   // Enables Z-buffer depth test
     
     window.requestAnimationFrame(render);
@@ -173,6 +190,7 @@ function setup(shaders)
     
 
     function wheelsAndAxles(){
+
         pushMatrix();
         multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, 0]);
 
@@ -184,7 +202,7 @@ function setup(shaders)
 
         popMatrix();
     }
-    
+
     
     function wheel(){
         pushMatrix();
@@ -209,7 +227,9 @@ function setup(shaders)
 
         multScale([(0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, (0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, 0.3]);
         multRotationX(angle);
+        multRotationY(wheelsRotation);
         multTranslation([0, (WHEEL_RADIUS+WHEEL_WIDTH)/2, 0]);
+        
 
         uploadModelView();
         PYRAMID.draw(gl, program, mode);
@@ -224,6 +244,7 @@ function setup(shaders)
 
         multScale([(WHEEL_RADIUS * 2) / 1.4, (WHEEL_RADIUS * 2) / 1.4, WHEEL_WIDTH]); 
         multRotationX(90);  
+        multRotationY(wheelsRotation);
         //1.4 is the initial diameter of the torus 
         //(TORUS_DISK_DIAMETER + TORUS_DIAMETER)
         uploadModelView();
@@ -240,6 +261,7 @@ function setup(shaders)
 
         multScale( [(0.6/1.4) * WHEEL_RADIUS * 2, (0.6/1.4) * WHEEL_RADIUS * 2, WHEEL_WIDTH*0.4] ); 
         multRotationX(90); 
+        multRotationY(wheelsRotation);
 
         // 0.6/1.4 comes from the relation of the inner circle 
         // of the torus vs the outer circle 
@@ -258,6 +280,7 @@ function setup(shaders)
 
         multScale([0.1, 0.1, WHEELS_Z_DISTANCE]);
         multRotationX(90);  
+        multRotationY(wheelsRotation);
         uploadModelView();
         CYLINDER.draw(gl, program, mode);
         
@@ -282,7 +305,7 @@ function setup(shaders)
 
     function hatchAndCannon(){
         hatch();
-        cannon1();
+        cannon();
     }
 
 
@@ -301,7 +324,7 @@ function setup(shaders)
     }
 
 
-    function cannon1(){
+    function cannon(){
         gl.uniform4f(fColor, 0, 0.2, 0, 1.0); 
 
         pushMatrix();
@@ -373,6 +396,9 @@ function setup(shaders)
 
 
 
+
+
+
     function render()
     {
         if(animation) time += speed;
@@ -389,9 +415,11 @@ function setup(shaders)
 
         ground(); 
         
-        tank();
 
-    
+        pushMatrix()
+        multTranslation([tankXTranslation, 0, 0])
+        tank();
+        popMatrix();
     }
 
 
