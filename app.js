@@ -207,13 +207,15 @@ function setup(shaders)
     function wheelsAndAxles(){
 
         pushMatrix();
-        multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, 0]);
-        
-        for(let i = 0; i < 4; i++){
-            wheels();
-            axles();
-            multTranslation([WHEELS_X_DISTANCE, 0, 0]);
-        }
+            multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, 0]);
+            uploadModelView();
+            
+            for(let i = 0; i < 4; i++){
+                wheels();
+                axles();
+                multTranslation([WHEELS_X_DISTANCE, 0, 0]);
+                uploadModelView();
+            }
 
         popMatrix();
     }
@@ -222,14 +224,17 @@ function setup(shaders)
     function wheels(){
         pushMatrix();
         
-        multTranslation([0 , 0, -WHEELS_Z_DISTANCE / 2]);
-
-        for(let i = 0; i < 2; i++){
-            tire();
-            rim();
-            (i==0)? wheelArmor(-90) : wheelArmor(90);
-            multTranslation([0, 0, WHEELS_Z_DISTANCE]);
-        }
+            multTranslation([0 , 0, -WHEELS_Z_DISTANCE / 2]);
+            uploadModelView();
+            for(let i = 0; i < 2; i++){
+                multRotationZ(wheelsRotation);
+                uploadModelView();
+                tire();
+                rim();
+                (i==0)? wheelArmor(-90) : wheelArmor(90);
+                multTranslation([0, 0, WHEELS_Z_DISTANCE]);
+                uploadModelView();
+            }
 
         popMatrix();
     }
@@ -240,14 +245,13 @@ function setup(shaders)
 
         pushMatrix();
 
-        multScale([(0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, (0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, 0.3]);
-        multRotationX(angle);
-        multRotationY(wheelsRotation);
-        multTranslation([0, (WHEEL_RADIUS+WHEEL_WIDTH)/2, 0]);
-        
+            multScale([(0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, (0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, 0.3]);
+            multRotationX(angle);
+            multTranslation([0, (WHEEL_RADIUS+WHEEL_WIDTH)/2, 0]);
+            
 
-        uploadModelView();
-        PYRAMID.draw(gl, program, mode);
+            uploadModelView();
+            PYRAMID.draw(gl, program, mode);
 
         popMatrix();
     }
@@ -255,15 +259,14 @@ function setup(shaders)
 
     function tire(){
         gl.uniform4f(fColor, 0.15, 0.15, 0.15, 1.0); 
-        pushMatrix();
+            pushMatrix();
 
-        multScale([(WHEEL_RADIUS * 2) / 1.4, (WHEEL_RADIUS * 2) / 1.4, WHEEL_WIDTH]); 
-        multRotationX(90);  
-        multRotationY(wheelsRotation);
-        //1.4 is the initial diameter of the torus 
-        //(TORUS_DISK_DIAMETER + TORUS_DIAMETER)
-        uploadModelView();
-        TORUS.draw(gl, program, mode);
+            multScale([(WHEEL_RADIUS * 2) / 1.4, (WHEEL_RADIUS * 2) / 1.4, WHEEL_WIDTH]); 
+            multRotationX(90);  
+            //1.4 is the initial diameter of the torus 
+            //(TORUS_DISK_DIAMETER + TORUS_DIAMETER)
+            uploadModelView();
+            TORUS.draw(gl, program, mode);
 
         popMatrix();
     }
@@ -274,16 +277,15 @@ function setup(shaders)
 
         pushMatrix();
 
-        multScale( [(0.6/1.4) * WHEEL_RADIUS * 2, (0.6/1.4) * WHEEL_RADIUS * 2, WHEEL_WIDTH*0.4] ); 
-        multRotationX(90); 
-        multRotationY(wheelsRotation);
+            multScale( [(0.6/1.4) * WHEEL_RADIUS * 2, (0.6/1.4) * WHEEL_RADIUS * 2, WHEEL_WIDTH*0.4] ); 
+            multRotationX(90); 
 
-        // 0.6/1.4 comes from the relation of the inner circle 
-        // of the torus vs the outer circle 
-        // innerCircle = (0.6/1.4) * outterCircle
+            // 0.6/1.4 comes from the relation of the inner circle 
+            // of the torus vs the outer circle 
+            // innerCircle = (0.6/1.4) * outterCircle
 
-        uploadModelView();
-        CYLINDER.draw(gl, program, mode);
+            uploadModelView();
+            CYLINDER.draw(gl, program, mode);
 
         popMatrix();
     }
@@ -292,7 +294,7 @@ function setup(shaders)
     function axles(){   
         gl.uniform4f(fColor, 0.4, 0.4, 0.4, 1.0);
         pushMatrix();
-
+        multRotationZ(wheelsRotation);
         multScale([0.1, 0.1, WHEELS_Z_DISTANCE]);
         multRotationX(90);  
         multRotationY(wheelsRotation);
@@ -328,9 +330,7 @@ function setup(shaders)
             multRotationY(hatchYRotation);
             uploadModelView();
             pushMatrix();
-                
                 multScale([BODY_LENGTH * 0.5, 0.8, BODY_WIDTH]);
-
                 uploadModelView();
                 SPHERE.draw(gl, program, mode);
             popMatrix();
