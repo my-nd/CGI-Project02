@@ -51,6 +51,9 @@ const HATCH_CENTER_Y = BODY_ELEVATION + 0.5;
 let tankXTranslation = 0;
 let wheelsRotation = 0;
 
+let hatchZRotation = 0;
+let hatchYRotation = 0;
+
 
 
 const VP_DISTANCE = 6;
@@ -82,10 +85,10 @@ function setup(shaders)
 
     document.onkeydown = function(event) {
         switch(event.key) {
-            case 'w':
+            case 'W':
                 mode = gl.LINES; 
                 break;
-            case 's':
+            case 'S':
                 mode = gl.TRIANGLES;
                 break;
             case 'p':
@@ -128,6 +131,18 @@ function setup(shaders)
             case "ArrowDown":
                 tankXTranslation += 0.05;
                 wheelsRotation -= (360*0.05) / (2*Math.PI * WHEEL_RADIUS);
+                break;
+            case "w":
+                hatchZRotation += 5;
+                break;
+            case "s":
+                hatchZRotation -= 5;
+                break;
+            case "a":
+                hatchYRotation += 5;
+                break;
+            case "d":
+                hatchYRotation -= 5;
                 break;
         }
     }
@@ -195,7 +210,7 @@ function setup(shaders)
         multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, 0]);
 
         for(let i = 0; i < 4; i++){
-            wheel();
+            wheels();
             axles();
             multTranslation([WHEELS_X_DISTANCE, 0, 0]);
         }
@@ -204,7 +219,7 @@ function setup(shaders)
     }
 
     
-    function wheel(){
+    function wheels(){
         pushMatrix();
         
         multTranslation([0 , 0, -WHEELS_Z_DISTANCE / 2]);
@@ -296,16 +311,12 @@ function setup(shaders)
             CUBE.draw(gl, program, mode);
         popMatrix();
 
-            bumpers();
-            hatchAndCannon();
+        bumpers();
 
+        pushMatrix();
+            hatch();
+        popMatrix();
 
-    }
-
-
-    function hatchAndCannon(){
-        hatch();
-        cannon();
     }
 
 
@@ -313,14 +324,15 @@ function setup(shaders)
         gl.uniform4f(fColor, 0, 0.4, 0, 1.0); 
 
         pushMatrix();
-
-        multTranslation([HATCH_CENTER_X, HATCH_CENTER_Y, 0]);
-        multScale([BODY_LENGTH * 0.5, 1.3, BODY_WIDTH]);
-        
-        uploadModelView();
-        SPHERE.draw(gl, program, mode);
-
+            multTranslation([HATCH_CENTER_X, HATCH_CENTER_Y, 0]);
+            multScale([BODY_LENGTH * 0.5, 1.3, BODY_WIDTH]);
+            multRotationY(hatchYRotation);
+            multRotationZ(hatchZRotation);
+            uploadModelView();
+            SPHERE.draw(gl, program, mode);
         popMatrix();
+
+        cannon();
     }
 
 
@@ -329,7 +341,7 @@ function setup(shaders)
 
         pushMatrix();
 
-        multTranslation([HATCH_CENTER_X + 1, HATCH_CENTER_Y + 1 , 0]);
+        multTranslation([HATCH_CENTER_X + 1.2, HATCH_CENTER_Y + 1.2 , 0]);
         multRotationZ(-45);
         multScale([0.2, 9, 0.2]);
         uploadModelView();
@@ -357,46 +369,36 @@ function setup(shaders)
     }
 
 
-    function frontBumper(){
+    function bumper(){
         gl.uniform4f(fColor, 0.0, 0.5, 0.0, 1.0);
-
-        pushMatrix();
-            multTranslation([0.36+(BODY_LENGTH/2), BODY_ELEVATION, 0]);
-            multScale([1.5*BODY_HEIGHT/2, 1, BODY_WIDTH]);
-
-            multRotationZ(-90);
-            uploadModelView();
-            PYRAMID.draw(gl, program, mode);
-        popMatrix();
-    }
-
-    function rearBumper(){
-        gl.uniform4f(fColor, 0.0, 0.5, 0.0, 1.0);
-        pushMatrix();
-            multTranslation([-0.36-(BODY_LENGTH/2), BODY_ELEVATION, 0]);
-            multScale([1.5 *BODY_HEIGHT/2, 1, BODY_WIDTH]);
-
-            multRotationZ(90);
-            uploadModelView();
-            PYRAMID.draw(gl, program, mode);
-        popMatrix()
+        uploadModelView();
+        PYRAMID.draw(gl, program, mode);
     }
 
     function bumpers(){
-        frontBumper();
-        rearBumper();
+        pushMatrix();
+            multTranslation([0.36+(BODY_LENGTH/2), BODY_ELEVATION, 0]);
+            multScale([1.5*BODY_HEIGHT/2, 1, BODY_WIDTH]);
+            multRotationZ(-90);
+            bumper();
+        popMatrix();
+
+        pushMatrix();
+            multTranslation([-0.36-(BODY_LENGTH/2), BODY_ELEVATION, 0]);
+            multScale([1.5 *BODY_HEIGHT/2, 1, BODY_WIDTH]);
+            multRotationZ(90);
+            bumper();
+        popMatrix()
     }
 
 
     function tank(){
-        body();
-        wheelsAndAxles();
+        pushMatrix();
+            multTranslation([tankXTranslation, 0, 0]);
+            body();
+            wheelsAndAxles();
+        popMatrix();
     }
-
-
-
-
-
 
 
     function render()
@@ -414,12 +416,7 @@ function setup(shaders)
         
 
         ground(); 
-        
-
-        pushMatrix()
-        multTranslation([tankXTranslation, 0, 0])
         tank();
-        popMatrix();
     }
 
 
