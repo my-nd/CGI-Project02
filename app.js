@@ -133,16 +133,16 @@ function setup(shaders)
                 wheelsRotation -= (360*0.05) / (2*Math.PI * WHEEL_RADIUS);
                 break;
             case "w":
-                hatchZRotation += 5;
+                hatchZRotation += 2;
                 break;
             case "s":
-                hatchZRotation -= 5;
+                hatchZRotation -= 2;
                 break;
             case "a":
-                hatchYRotation += 5;
+                hatchYRotation += 2;
                 break;
             case "d":
-                hatchYRotation -= 5;
+                hatchYRotation -= 2;
                 break;
         }
     }
@@ -208,7 +208,7 @@ function setup(shaders)
 
         pushMatrix();
         multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, 0]);
-
+        
         for(let i = 0; i < 4; i++){
             wheels();
             axles();
@@ -322,17 +322,21 @@ function setup(shaders)
 
     function hatch(){
         gl.uniform4f(fColor, 0, 0.4, 0, 1.0); 
-
+        
         pushMatrix();
             multTranslation([HATCH_CENTER_X, HATCH_CENTER_Y, 0]);
-            multScale([BODY_LENGTH * 0.5, 1.3, BODY_WIDTH]);
             multRotationY(hatchYRotation);
-            multRotationZ(hatchZRotation);
             uploadModelView();
-            SPHERE.draw(gl, program, mode);
-        popMatrix();
+            pushMatrix();
+                
+                multScale([BODY_LENGTH * 0.5, 0.8, BODY_WIDTH]);
 
-        cannon();
+                uploadModelView();
+                SPHERE.draw(gl, program, mode);
+            popMatrix();
+
+            cannon();
+        popMatrix();
     }
 
 
@@ -340,15 +344,19 @@ function setup(shaders)
         gl.uniform4f(fColor, 0, 0.2, 0, 1.0); 
 
         pushMatrix();
-
-        multTranslation([HATCH_CENTER_X + 1.2, HATCH_CENTER_Y + 1.2 , 0]);
-        multRotationZ(-45);
-        multScale([0.2, 9, 0.2]);
-        uploadModelView();
-        TORUS.draw(gl, program, mode);
+            multRotationZ(hatchZRotation);
+            uploadModelView();
+            pushMatrix();
+                multTranslation([1.2, 1.2 , 0]);
+                multRotationZ(-45);
+                multScale([0.2, 9, 0.2]);
+                uploadModelView();
+                TORUS.draw(gl, program, mode);
+            popMatrix();
+            supressor();
         popMatrix();
         
-        supressor();
+        
     }
 
 
@@ -358,9 +366,9 @@ function setup(shaders)
 
         pushMatrix();
 
-        multTranslation([HATCH_CENTER_X + 2.3, HATCH_CENTER_Y + 2.3 , 0]);
+        multTranslation([2.3, 2.3 , 0]);
         multRotationZ(-45);
-        multScale([0.4, 2, 0.4]);
+        multScale([0.25, 2, 0.4]);
         uploadModelView();
         TORUS.draw(gl, program, mode);
 
