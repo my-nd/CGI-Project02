@@ -172,48 +172,39 @@ function setup(shaders)
     }
     
 
-    function wheels(){
+    function wheelsAndAxles(){
+        pushMatrix();
+        multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, 0]);
 
-        pushMatrix(); 
+        for(let i = 0; i < 4; i++){
+            wheel();
+            axles();
+            multTranslation([WHEELS_X_DISTANCE, 0, 0]);
+        }
 
-        multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, -WHEELS_Z_DISTANCE / 2]);
+        popMatrix();
+    }
+    
+    
+    function wheel(){
+        pushMatrix();
+        
+        multTranslation([0 , 0, -WHEELS_Z_DISTANCE / 2]);
+
         for(let i = 0; i < 2; i++){
-            pushMatrix();
-
-            for(let j = 0; j < 4; j++){ 
-                gl.uniform4f(fColor, 0.15, 0.15, 0.15, 1.0); 
-                tire();
-
-                gl.uniform4f(fColor, 0.3, 0.3, 0.3, 1.0);
-                rim();
-
-                if(i == 0){
-                    gl.uniform4f(fColor, 0.4, 0.4, 0.4, 1.0);
-                    pushMatrix();
-
-                    multTranslation([0, 0, WHEELS_Z_DISTANCE/2]);
-                    axles();
-
-                    popMatrix();
-
-                    gl.uniform4f(fColor, 0.5, 0.1, 0.32, 1.0);
-                    wheelArmor(-90);
-                }
-                else {
-                    gl.uniform4f(fColor, 0.5, 0.1, 0.32, 1.0);
-                    wheelArmor(90);
-                }
-                multTranslation([WHEELS_X_DISTANCE, 0, 0]);
-
-
-            }
-            popMatrix();
+            tire();
+            rim();
+            (i==0)? wheelArmor(-90) : wheelArmor(90);
             multTranslation([0, 0, WHEELS_Z_DISTANCE]);
         }
 
         popMatrix();
     }
-function wheelArmor(angle) {
+
+
+    function wheelArmor(angle) {
+        gl.uniform4f(fColor, 0.5, 0.1, 0.32, 1.0);
+
         pushMatrix();
 
         multScale([(0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, (0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, 0.3]);
@@ -226,10 +217,11 @@ function wheelArmor(angle) {
         popMatrix();
     }
 
+
     function tire(){
+        gl.uniform4f(fColor, 0.15, 0.15, 0.15, 1.0); 
         pushMatrix();
 
-        
         multScale([(WHEEL_RADIUS * 2) / 1.4, (WHEEL_RADIUS * 2) / 1.4, WHEEL_WIDTH]); 
         multRotationX(90);  
         //1.4 is the initial diameter of the torus 
@@ -240,10 +232,12 @@ function wheelArmor(angle) {
         popMatrix();
     }
 
+
     function rim(){
+        gl.uniform4f(fColor, 0.3, 0.3, 0.3, 1.0);
+
         pushMatrix();
 
-        
         multScale( [(0.6/1.4) * WHEEL_RADIUS * 2, (0.6/1.4) * WHEEL_RADIUS * 2, WHEEL_WIDTH*0.4] ); 
         multRotationX(90); 
 
@@ -258,7 +252,8 @@ function wheelArmor(angle) {
     }
 
 
-    function axles(){
+    function axles(){   
+        gl.uniform4f(fColor, 0.4, 0.4, 0.4, 1.0);
         pushMatrix();
 
         multScale([0.1, 0.1, WHEELS_Z_DISTANCE]);
@@ -271,21 +266,29 @@ function wheelArmor(angle) {
 
 
     function body(){
-        pushMatrix();
-
+        pushMatrix();   
             multScale([BODY_LENGTH, BODY_HEIGHT, BODY_WIDTH]);
             multTranslation([0, BODY_ELEVATION, 0]);
             uploadModelView();
             CUBE.draw(gl, program, mode);
         popMatrix();
 
-        pushMatrix();
-            frontAndRear();
-        popMatrix();
+            bumpers();
+            hatchAndCannon();
 
 
     }
+
+
+    function hatchAndCannon(){
+        hatch();
+        cannon1();
+    }
+
+
     function hatch(){
+        gl.uniform4f(fColor, 0, 0.4, 0, 1.0); 
+
         pushMatrix();
 
         multTranslation([HATCH_CENTER_X, HATCH_CENTER_Y, 0]);
@@ -297,34 +300,43 @@ function wheelArmor(angle) {
         popMatrix();
     }
 
-    function cannon(){
-
-        pushMatrix();
-
-        multTranslation([HATCH_CENTER_X + 1, HATCH_CENTER_Y + 1 , 0]);
-        multRotationZ(-45);
-        multScale([0.2, 2.5, 0.2]);
-
-        uploadModelView();
-        CYLINDER.draw(gl, program, mode);
-
-        popMatrix();
-    }
 
     function cannon1(){
+        gl.uniform4f(fColor, 0, 0.2, 0, 1.0); 
+
         pushMatrix();
 
         multTranslation([HATCH_CENTER_X + 1, HATCH_CENTER_Y + 1 , 0]);
         multRotationZ(-45);
-        multScale([0.2, 7, 0.2]);
+        multScale([0.2, 9, 0.2]);
+        uploadModelView();
+        TORUS.draw(gl, program, mode);
+        popMatrix();
+        
+        supressor();
+    }
 
+
+    function supressor(){
+
+        gl.uniform4f(fColor, 0.5, 0.0, 0, 1.0); 
+
+        pushMatrix();
+
+        multTranslation([HATCH_CENTER_X + 2.3, HATCH_CENTER_Y + 2.3 , 0]);
+        multRotationZ(-45);
+        multScale([0.4, 2, 0.4]);
         uploadModelView();
         TORUS.draw(gl, program, mode);
 
         popMatrix();
+
     }
 
-    function frontAndRear() {
+
+    function frontBumper(){
+        gl.uniform4f(fColor, 0.0, 0.5, 0.0, 1.0);
+
         pushMatrix();
             multTranslation([0.36+(BODY_LENGTH/2), BODY_ELEVATION, 0]);
             multScale([1.5*BODY_HEIGHT/2, 1, BODY_WIDTH]);
@@ -333,7 +345,10 @@ function wheelArmor(angle) {
             uploadModelView();
             PYRAMID.draw(gl, program, mode);
         popMatrix();
+    }
 
+    function rearBumper(){
+        gl.uniform4f(fColor, 0.0, 0.5, 0.0, 1.0);
         pushMatrix();
             multTranslation([-0.36-(BODY_LENGTH/2), BODY_ELEVATION, 0]);
             multScale([1.5 *BODY_HEIGHT/2, 1, BODY_WIDTH]);
@@ -341,15 +356,18 @@ function wheelArmor(angle) {
             multRotationZ(90);
             uploadModelView();
             PYRAMID.draw(gl, program, mode);
-        popMatrix();
+        popMatrix()
     }
 
-    function sideSkirts(){
-
+    function bumpers(){
+        frontBumper();
+        rearBumper();
     }
+
 
     function tank(){
-
+        body();
+        wheelsAndAxles();
     }
 
 
@@ -369,16 +387,9 @@ function wheelArmor(angle) {
         loadMatrix(lookAt([camX, camY, camZ], [0,0,0], [0,1,upZ]));
         
 
-        ground();                                                                                       
-        gl.uniform4f(fColor, 0, 0.2, 0, 1.0); 
-        body();
-        wheels();
+        ground(); 
         
-
-        gl.uniform4f(fColor, 0, 0.4, 0, 1.0); 
-        hatch();
-        gl.uniform4f(fColor, 0, 0.2, 0, 1.0); 
-        cannon1();
+        tank();
 
     
     }
