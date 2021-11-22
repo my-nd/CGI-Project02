@@ -133,16 +133,18 @@ function setup(shaders)
                 wheelsRotation -= (360*0.05) / (2*Math.PI * WHEEL_RADIUS);
                 break;
             case "w":
-                hatchZRotation += 2;
+                if(hatchZRotation <= 44)
+                    hatchZRotation += 1;
                 break;
             case "s":
-                hatchZRotation -= 2;
+                if(hatchZRotation >= -34)
+                    hatchZRotation -= 1;
                 break;
             case "a":
-                hatchYRotation += 2;
+                hatchYRotation += 1;
                 break;
             case "d":
-                hatchYRotation -= 2;
+                hatchYRotation -= 1;
                 break;
         }
     }
