@@ -9,7 +9,7 @@ import * as CYLINDER from '../../libs/cylinder.js';
 import * as PYRAMID from '../../libs/pyramid.js';
 
 
-import { vec4 } from "./libs/MV.js";
+import { vec3 } from "./libs/MV.js";
 
 /** @type WebGLRenderingContext */
 let gl;
@@ -47,12 +47,21 @@ const HATCH_CENTER_X = -WHEELS_X_DISTANCE + 0.2;
 const HATCH_CENTER_Y = BODY_ELEVATION + 0.5;    
 
 
-
+//g
 let tankXTranslation = 0;
 let wheelsRotation = 0;
 
+//Hatch rotation angles
 let hatchZRotation = 0;
 let hatchYRotation = 0;
+
+//Bullet variables
+let v0 = 5;
+let a = 1;
+
+let projectilesArray = [];
+
+
 
 
 
@@ -60,6 +69,7 @@ const VP_DISTANCE = 6;
 let camX = VP_DISTANCE, camY = VP_DISTANCE, camZ = VP_DISTANCE;
 let upZ = 0;
 
+let currentSuppressorMModel;
 
 
 
@@ -145,6 +155,9 @@ function setup(shaders)
                 break;
             case "d":
                 hatchYRotation -= 1;
+                break;
+            case " ":
+                fire();
                 break;
         }
     }
@@ -363,13 +376,15 @@ function setup(shaders)
 
 
     function supressor(){
-
-        gl.uniform4f(fColor, 0.5, 0.0, 0, 1.0); 
-
         pushMatrix();
 
-        multTranslation([2.3, 2.3 , 0]);
+        multTranslation([2.45, 2.45, 0]);
+        
         multRotationZ(-45);
+        currentSuppressorMModel = modelView();
+        projectiles();       
+        gl.uniform4f(fColor, 0.5, 0.0, 0, 1.0); 
+
         multScale([0.25, 2, 0.4]);
         uploadModelView();
         TORUS.draw(gl, program, mode);
@@ -408,6 +423,41 @@ function setup(shaders)
             body();
             wheelsAndAxles();
         popMatrix();
+    }
+
+    function projectile(){
+        gl.uniform4f(fColor, 0.0, 0.0, 1.0, 1.0);
+        pushMatrix();
+            multScale([0.15, 0.3, 0.15]);
+            uploadModelView();
+            CYLINDER.draw(gl, program, mode);
+
+            multTranslation([0, 0.5, 0]);
+            multScale([1, 2 , 1]);
+            uploadModelView();
+            SPHERE.draw(gl, program, mode);
+
+        popMatrix();
+    }
+
+    function projectiles(){
+        for(let i = 0; i < projectilesArray.length; i++){
+
+            let t = time - projectilesArray[i][2];
+            
+            let pos = [v0*Math.cos(projectilesArray[i][1])*t,  
+                        -0.5 * a * Math.pow(t, 2), 0 ]; 
+            
+            pushMatrix();
+                loadMatrix(projectilesArray[i][0]);
+                multTranslation([pos[0], pos[1], pos[2]]);
+                projectile();
+            popMatrix();
+        }   
+    }
+
+    function fire(){
+        projectilesArray.push([currentSuppressorMModel, -45+hatchZRotation, time]);
     }
 
 
