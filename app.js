@@ -19,7 +19,7 @@ let speed = 1/60.0;     // Speed (how many days added to time on each render pas
 let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 let animation = true;   // Animation is running
 
-let mModelView;
+let mView;
 
 /*
 Each unit corresponds to 1 meter.
@@ -382,7 +382,8 @@ function setup(shaders)
         multTranslation([2.45, 2.45, 0]);
         
         multRotationZ(-45);
-        currentSuppressorMModel = mult(inverse(mModelView), modelView());
+        uploadModelView();
+        currentSuppressorMModel = mult(inverse(mView), modelView()); // Mview^-1 * Mmodelview
         projectiles();       
         gl.uniform4f(fColor, 0.5, 0.0, 0, 1.0); 
 
@@ -450,7 +451,7 @@ function setup(shaders)
                         -0.5 * a * Math.pow(t, 2), 0 ]; 
             
             pushMatrix();
-                loadMatrix(projectilesArray[i][0]);
+                loadMatrix(mult(mView, projectilesArray[i][0]));
                 multTranslation([pos[0], pos[1], pos[2]]);
                 projectile();
             popMatrix();
@@ -473,8 +474,8 @@ function setup(shaders)
         
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
     
-        mModelView = lookAt([camX, camY, camZ], [0,0,0], [0,1,upZ]);
-        loadMatrix(mModelView);
+        mView = lookAt([camX, camY, camZ], [0,0,0], [0,1,upZ]);
+        loadMatrix(mView);
         
 
         ground(); 
