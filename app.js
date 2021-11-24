@@ -1,5 +1,5 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
-import { ortho, lookAt, flatten } from "../../libs/MV.js";
+import { ortho, lookAt, flatten, mult } from "../../libs/MV.js";
 import {modelView, loadMatrix, multRotationX, multRotationY, multRotationZ, multScale, multTranslation, popMatrix, pushMatrix} from "../../libs/stack.js";
 
 import * as SPHERE from '../../libs/sphere.js';
@@ -9,7 +9,7 @@ import * as CYLINDER from '../../libs/cylinder.js';
 import * as PYRAMID from '../../libs/pyramid.js';
 
 
-import { vec3 } from "./libs/MV.js";
+import { inverse, vec3 } from "./libs/MV.js";
 
 /** @type WebGLRenderingContext */
 let gl;
@@ -19,6 +19,7 @@ let speed = 1/60.0;     // Speed (how many days added to time on each render pas
 let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 let animation = true;   // Animation is running
 
+let mModelView;
 
 /*
 Each unit corresponds to 1 meter.
@@ -381,7 +382,7 @@ function setup(shaders)
         multTranslation([2.45, 2.45, 0]);
         
         multRotationZ(-45);
-        currentSuppressorMModel = modelView();
+        currentSuppressorMModel = mult(inverse(mModelView), modelView());
         projectiles();       
         gl.uniform4f(fColor, 0.5, 0.0, 0, 1.0); 
 
@@ -472,7 +473,8 @@ function setup(shaders)
         
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
     
-        loadMatrix(lookAt([camX, camY, camZ], [0,0,0], [0,1,upZ]));
+        mModelView = lookAt([camX, camY, camZ], [0,0,0], [0,1,upZ]);
+        loadMatrix(mModelView);
         
 
         ground(); 
