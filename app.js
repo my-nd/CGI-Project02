@@ -449,9 +449,9 @@ function setup(shaders)
             
             let pos = add(add(initialPos, scale(t,initialVel)), scale(0.5,scale(Math.pow(t,2),a)));
             
+            if (pos[1] < 0) continue;
+
             pushMatrix();
-                
-                //console.log(pos);
                 multTranslation([pos[0], pos[1], pos[2]]);
                 projectile();
             popMatrix();
