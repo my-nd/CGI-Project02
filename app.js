@@ -56,8 +56,8 @@ let hatchZRotation = 0;
 let hatchYRotation = 0;
 
 //Bullet variables
-let v0 = 5;
-let a = vec4(0,-1,0,1);
+let v0 = 10;
+let a = vec4(0,-9.8,0,1);
 
 let projectilesArray = [];
 
@@ -380,7 +380,7 @@ function setup(shaders)
         multRotationZ(-45);
         uploadModelView();
         currentSuppressorMModel = mult(inverse(mView), modelView()); // Mview^-1 * Mmodelview
-        projectiles();
+        //projectiles();
         gl.uniform4f(fColor, 0.5, 0.0, 0, 1.0); 
 
         multScale([0.25, 2, 0.4]);
@@ -447,13 +447,11 @@ function setup(shaders)
 
             let t = time - projectilesArray[i][2];
             
-            //let pos = initialPos + initialVel*t + 0.5*a*Math.pow(t,2);
-            let pos = add(scale(0.5,scale(Math.pow(t,2),a)),add(initialPos, scale(t,initialVel)));
+            let pos = add(add(initialPos, scale(t,initialVel)), scale(0.5,scale(Math.pow(t,2),a)));
             
             pushMatrix();
-                //loadMatrix(mult(mView, projectilesArray[i][0]));
                 
-                console.log(initialPos);
+                //console.log(pos);
                 multTranslation([pos[0], pos[1], pos[2]]);
                 projectile();
             popMatrix();
@@ -467,7 +465,7 @@ function setup(shaders)
 
     function render()
     {
-        if(animation) time += speed;
+        time += speed;
         window.requestAnimationFrame(render);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -482,6 +480,7 @@ function setup(shaders)
 
         ground(); 
         tank();
+        projectiles();
     }
 
 
