@@ -1,5 +1,5 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
-import { ortho, lookAt, flatten, mult, normalMatrix } from "../../libs/MV.js";
+import { ortho, lookAt, flatten, mult, normalMatrix, inverse, vec3, vec4, add, scale  } from "../../libs/MV.js";
 import {modelView, loadMatrix, multRotationX, multRotationY, multRotationZ, multScale, multTranslation, popMatrix, pushMatrix} from "../../libs/stack.js";
 
 import * as SPHERE from '../../libs/sphere.js';
@@ -8,8 +8,6 @@ import * as TORUS from '../../libs/torus.js';
 import * as CYLINDER from '../../libs/cylinder.js';
 import * as PYRAMID from '../../libs/pyramid.js';
 
-
-import { inverse, vec3 } from "./libs/MV.js";
 
 /** @type WebGLRenderingContext */
 let gl;
@@ -59,7 +57,7 @@ let hatchYRotation = 0;
 
 //Bullet variables
 let v0 = 5;
-let a = 1;
+let a = vec4(0,-1,0,1);
 
 let projectilesArray = [];
 
@@ -441,16 +439,21 @@ function setup(shaders)
     }
 
     function projectiles(){
+
         for(let i = 0; i < projectilesArray.length; i++){
+
+            let initialPos = mult(projectilesArray[i][0],vec4(0,0,0,1));
+            let initialVel = mult(normalMatrix(projectilesArray[i][0]),vec4(0,v0,0,0));
 
             let t = time - projectilesArray[i][2];
             
-            let pos = [v0*Math.cos(projectilesArray[i][1])*t,  
-                        -0.5 * a * Math.pow(t, 2), 0 ]; 
+            //let pos = initialPos + initialVel*t + 0.5*a*Math.pow(t,2);
+            let pos = add(scale(0.5,scale(Math.pow(t,2),a)),add(initialPos, scale(t,initialVel)));
             
             pushMatrix();
-                loadMatrix(mult(mView, projectilesArray[i][0]));
-                let bulletOrientation = normalMatrix(mult(mView, projectilesArray[i][0]));
+                //loadMatrix(mult(mView, projectilesArray[i][0]));
+                
+                console.log(initialPos);
                 multTranslation([pos[0], pos[1], pos[2]]);
                 projectile();
             popMatrix();
