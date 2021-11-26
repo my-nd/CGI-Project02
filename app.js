@@ -1,5 +1,5 @@
 import { buildProgramFromSources, loadShadersFromURLS, setupWebGL } from "../../libs/utils.js";
-import { ortho, lookAt, flatten, mult } from "../../libs/MV.js";
+import { ortho, lookAt, flatten, mult, normalMatrix } from "../../libs/MV.js";
 import {modelView, loadMatrix, multRotationX, multRotationY, multRotationZ, multScale, multTranslation, popMatrix, pushMatrix} from "../../libs/stack.js";
 
 import * as SPHERE from '../../libs/sphere.js';
@@ -42,6 +42,7 @@ const BODY_HEIGHT = 1;
 const BODY_LENGTH = WHEELS_X_DISTANCE * 3 * 1.1;
 const BODY_WIDTH = WHEELS_Z_DISTANCE - WHEEL_WIDTH/2;
 const BODY_ELEVATION = WHEEL_RADIUS * 1.7;
+
 
 //Hatch
 const HATCH_CENTER_X = -WHEELS_X_DISTANCE + 0.2;
@@ -241,31 +242,26 @@ function setup(shaders)
         pushMatrix();
         
             multTranslation([0 , 0, -WHEELS_Z_DISTANCE / 2]);
-            uploadModelView();
             for(let i = 0; i < 2; i++){
                 multRotationZ(wheelsRotation);
-                uploadModelView();
                 tire();
                 rim();
-                (i==0)? wheelArmor(-90) : wheelArmor(90);
+                (i==0)? wheelArmor(-90, 0) : wheelArmor(90, 0);
                 multTranslation([0, 0, WHEELS_Z_DISTANCE]);
-                uploadModelView();
             }
 
         popMatrix();
     }
 
 
-    function wheelArmor(angle) {
+    function wheelArmor(angle, displacement) {
         gl.uniform4f(fColor, 0.5, 0.1, 0.32, 1.0);
 
         pushMatrix();
-
+            multTranslation([0, 0, displacement]);
+            
             multScale([(0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, (0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, 0.3]);
             multRotationX(angle);
-            multTranslation([0, (WHEEL_RADIUS+WHEEL_WIDTH)/2, 0]);
-            
-
             uploadModelView();
             PYRAMID.draw(gl, program, mode);
 
@@ -277,8 +273,9 @@ function setup(shaders)
         gl.uniform4f(fColor, 0.15, 0.15, 0.15, 1.0); 
             pushMatrix();
 
-            multScale([(WHEEL_RADIUS * 2) / 1.4, (WHEEL_RADIUS * 2) / 1.4, WHEEL_WIDTH]); 
-            multRotationX(90);  
+            multRotationX(90); 
+            multScale([(WHEEL_RADIUS * 2) / 1.4, WHEEL_WIDTH, (WHEEL_RADIUS * 2) / 1.4]); 
+
             //1.4 is the initial diameter of the torus 
             //(TORUS_DISK_DIAMETER + TORUS_DIAMETER)
             uploadModelView();
@@ -293,8 +290,9 @@ function setup(shaders)
 
         pushMatrix();
 
-            multScale( [(0.6/1.4) * WHEEL_RADIUS * 2, (0.6/1.4) * WHEEL_RADIUS * 2, WHEEL_WIDTH*0.4] ); 
             multRotationX(90); 
+            multScale( [(0.6/1.4) * WHEEL_RADIUS * 2, WHEEL_WIDTH*0.4, (0.6/1.4) * WHEEL_RADIUS * 2] ); 
+
 
             // 0.6/1.4 comes from the relation of the inner circle 
             // of the torus vs the outer circle 
@@ -307,24 +305,24 @@ function setup(shaders)
     }
 
 
-    function axles(){   
+    function axles(){
         gl.uniform4f(fColor, 0.4, 0.4, 0.4, 1.0);
         pushMatrix();
-        multRotationZ(wheelsRotation);
-        multScale([0.1, 0.1, WHEELS_Z_DISTANCE]);
-        multRotationX(90);  
+
+        multRotationX(90);
         multRotationY(wheelsRotation);
+        multScale([0.1, WHEELS_Z_DISTANCE, 0.1]);
         uploadModelView();
         CYLINDER.draw(gl, program, mode);
-        
+
         popMatrix();
     }
 
 
     function body(){
-        pushMatrix();   
-            multScale([BODY_LENGTH, BODY_HEIGHT, BODY_WIDTH]);
+        pushMatrix();
             multTranslation([0, BODY_ELEVATION, 0]);
+            multScale([BODY_LENGTH, BODY_HEIGHT, BODY_WIDTH]);
             uploadModelView();
             CUBE.draw(gl, program, mode);
         popMatrix();
@@ -380,11 +378,11 @@ function setup(shaders)
         pushMatrix();
 
         multTranslation([2.45, 2.45, 0]);
-        
+
         multRotationZ(-45);
         uploadModelView();
         currentSuppressorMModel = mult(inverse(mView), modelView()); // Mview^-1 * Mmodelview
-        projectiles();       
+        projectiles();
         gl.uniform4f(fColor, 0.5, 0.0, 0, 1.0); 
 
         multScale([0.25, 2, 0.4]);
@@ -404,16 +402,16 @@ function setup(shaders)
 
     function bumpers(){
         pushMatrix();
-            multTranslation([0.36+(BODY_LENGTH/2), BODY_ELEVATION, 0]);
-            multScale([1.5*BODY_HEIGHT/2, 1, BODY_WIDTH]);
+            multTranslation([0.5+(BODY_LENGTH/2), BODY_ELEVATION, 0]);
             multRotationZ(-90);
+            multScale([BODY_HEIGHT, 1, BODY_WIDTH]);
             bumper();
         popMatrix();
 
         pushMatrix();
-            multTranslation([-0.36-(BODY_LENGTH/2), BODY_ELEVATION, 0]);
-            multScale([1.5 *BODY_HEIGHT/2, 1, BODY_WIDTH]);
+            multTranslation([-0.5-(BODY_LENGTH/2), BODY_ELEVATION, 0]);
             multRotationZ(90);
+            multScale([BODY_HEIGHT, 1, BODY_WIDTH]);
             bumper();
         popMatrix()
     }
@@ -452,6 +450,7 @@ function setup(shaders)
             
             pushMatrix();
                 loadMatrix(mult(mView, projectilesArray[i][0]));
+                let bulletOrientation = normalMatrix(mult(mView, projectilesArray[i][0]));
                 multTranslation([pos[0], pos[1], pos[2]]);
                 projectile();
             popMatrix();
