@@ -43,7 +43,7 @@ const BODY_ELEVATION = WHEEL_RADIUS * 1.7;
 
 
 //Hatch
-const HATCH_CENTER_X = -WHEELS_X_DISTANCE + 0.2;
+const HATCH_CENTER_X = -0.5;
 const HATCH_CENTER_Y = BODY_ELEVATION + 0.5;    
 const DEFAULT_CANNON_ROTATION = -45;
 
@@ -258,7 +258,7 @@ function setup(shaders)
 
 
     function wheelArmor(angle, displacement) {
-        gl.uniform4f(fColor, 0.5, 0.1, 0.32, 1.0);
+        gl.uniform4f(fColor, 0.2, 0.2, 0.2, 1.0);
 
         pushMatrix();
             multTranslation([0, 0, displacement]);
@@ -323,6 +323,7 @@ function setup(shaders)
 
 
     function body(){
+        gl.uniform4f(fColor, 0.25, 0.30, 0.00, 1.0);
         pushMatrix();
             multTranslation([0, BODY_ELEVATION, 0]);
             multScale([BODY_LENGTH, BODY_HEIGHT, BODY_WIDTH]);
@@ -397,7 +398,7 @@ function setup(shaders)
 
 
     function bumper(){
-        gl.uniform4f(fColor, 0.0, 0.5, 0.0, 1.0);
+        gl.uniform4f(fColor, 0.0, 0.35, 0.0, 1.0);
         uploadModelView();
         PYRAMID.draw(gl, program, mode);
     }
