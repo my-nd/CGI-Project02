@@ -8,6 +8,10 @@ import * as TORUS from '../../libs/torus.js';
 import * as CYLINDER from '../../libs/cylinder.js';
 import * as PYRAMID from '../../libs/pyramid.js';
 
+/**
+ * @author António Ferreira 58340 
+ * @author Tiago Fernandes 57677
+ */
 
 /** @type WebGLRenderingContext */
 let gl;
@@ -18,10 +22,6 @@ let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
 let lastFiredTime = -10000;
 
 let mView;
-
-/*
-Each unit corresponds to 1 meter.
-*/
 
 //Ground
 const SQUARE_LENGTH = 1;
