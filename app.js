@@ -24,29 +24,31 @@ Each unit corresponds to 1 meter.
 */
 
 //Ground
-const SQUARE_LENGTH = 0.5;
-const GROUND_X = 10;
-const GROUND_Z = 10;
+const SQUARE_LENGTH = 1;
 const GROUND_WIDTH = 0.1;
 const N_TILES_PER_SIDE = 20;
 
-//Wheels
-const WHEEL_RADIUS = 0.4;
-const WHEEL_WIDTH = 0.6;
-const WHEELS_X_DISTANCE = (WHEEL_RADIUS * 2) + 0.2;
-const WHEELS_Z_DISTANCE = 2.0;
-
 //Body
 const BODY_HEIGHT = 1;
-const BODY_LENGTH = WHEELS_X_DISTANCE * 3 * 1.1;
-const BODY_WIDTH = WHEELS_Z_DISTANCE - WHEEL_WIDTH/2;
+const BODY_LENGTH = 7;
+const BODY_WIDTH = 2;
+
+
+//Wheels
+const WHEEL_RADIUS = 0.4;
 const BODY_ELEVATION = WHEEL_RADIUS * 1.7;
+
+const WHEEL_WIDTH = WHEEL_RADIUS*0.5;
+const WHEELS_X_DISTANCE = BODY_LENGTH/4;
+const WHEELS_Z_DISTANCE = BODY_WIDTH + WHEEL_WIDTH;
+
 
 
 //Hatch
-const HATCH_CENTER_X = -0.5;
-const HATCH_CENTER_Y = BODY_ELEVATION + 0.5;    
+const HATCH_HEIGHT = BODY_HEIGHT;   
+
 const DEFAULT_CANNON_ROTATION = -45;
+
 
 
 //g
@@ -72,7 +74,7 @@ let VP_DISTANCE = 6;
 let camX = VP_DISTANCE, camY = VP_DISTANCE, camZ = VP_DISTANCE;
 let upZ = 0;
 
-let currentSuppressorMModel;
+let mModel;
 
 
 
@@ -201,7 +203,7 @@ function setup(shaders)
     }
 
     function ground(){ 
-        for(let z = 0; z < N_TILES_PER_SIDE; z++){
+        for(let z = 0; z < N_TILES_PER_SIDE; z++){   
             for(let x = 0; x < N_TILES_PER_SIDE; x++){
                 pushMatrix();
                     multTranslation([((-N_TILES_PER_SIDE/2) + (x+0.5)) * SQUARE_LENGTH, 
@@ -213,20 +215,17 @@ function setup(shaders)
         }
     }
 
-
+    
     
 
     function wheelsAndAxles(){
 
         pushMatrix();
-            multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, 0]);
-            uploadModelView();
-            
+            multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, 0]);            
             for(let i = 0; i < 4; i++){
                 wheels();
                 axles();
                 multTranslation([WHEELS_X_DISTANCE, 0, 0]);
-                uploadModelView();
             }
 
         popMatrix();
@@ -240,7 +239,6 @@ function setup(shaders)
             for(let i = 0; i < 2; i++){
                 pushMatrix();
                     multRotationZ(wheelsRotation);
-                    uploadModelView()
                     tire();
                     rim();
                 popMatrix();
@@ -273,7 +271,7 @@ function setup(shaders)
             pushMatrix();
 
             multRotationX(90); 
-            multScale([(WHEEL_RADIUS * 2) / 1.4, WHEEL_WIDTH, (WHEEL_RADIUS * 2) / 1.4]); 
+            multScale([(WHEEL_RADIUS * 2) / 1.4, WHEEL_WIDTH/0.4, (WHEEL_RADIUS * 2) / 1.4]); 
 
             //1.4 is the initial diameter of the torus 
             //(TORUS_DISK_DIAMETER + TORUS_DIAMETER)
@@ -291,7 +289,6 @@ function setup(shaders)
 
             multRotationX(90); 
             multScale( [(0.6/1.4) * WHEEL_RADIUS * 2, WHEEL_WIDTH*0.4, (0.6/1.4) * WHEEL_RADIUS * 2] ); 
-
 
             // 0.6/1.4 comes from the relation of the inner circle 
             // of the torus vs the outer circle 
@@ -329,29 +326,31 @@ function setup(shaders)
 
         bumpers();
 
-        pushMatrix();
-            hatch();
-        popMatrix();
+        hatchAndCannon();
 
     }
 
 
     function hatch(){
-        gl.uniform4f(fColor, 0, 0.4, 0, 1.0); 
-        
         pushMatrix();
-            multTranslation([HATCH_CENTER_X, HATCH_CENTER_Y, 0]);
-            multRotationY(hatchYRotation);
+            multScale([BODY_LENGTH * 0.5, HATCH_HEIGHT, BODY_WIDTH]);
             uploadModelView();
-            pushMatrix();
-                multScale([BODY_LENGTH * 0.5, 0.8, BODY_WIDTH]);
-                uploadModelView();
-                SPHERE.draw(gl, program, mode);
-            popMatrix();
-
-            cannon();
+            SPHERE.draw(gl, program, mode);
         popMatrix();
     }
+
+
+    function hatchAndCannon(){
+        pushMatrix();
+            gl.uniform4f(fColor, 0, 0.4, 0, 1.0); 
+            multTranslation([0, BODY_ELEVATION + HATCH_HEIGHT/2, 0]);
+            multRotationY(hatchYRotation);
+
+            hatch();
+            cannon();
+        popMatrix()
+    }
+
 
 
     function cannon(){
@@ -359,14 +358,12 @@ function setup(shaders)
 
         pushMatrix();
             multRotationZ(hatchZRotation);
-            uploadModelView();
             pushMatrix();
                 multTranslation([1.2, 1.2 , 0]);
                 multRotationZ(DEFAULT_CANNON_ROTATION);
                 multScale([0.2, 9, 0.2]);
                 uploadModelView();
-                TORUS.draw(gl, program, mode);
-                
+                TORUS.draw(gl, program, mode);  
             popMatrix();
             supressor();
         popMatrix();
@@ -381,7 +378,7 @@ function setup(shaders)
         multTranslation([2.45, 2.45, 0]);
         multRotationZ(DEFAULT_CANNON_ROTATION);
         uploadModelView();
-        currentSuppressorMModel = mult(inverse(mView), modelView()); // Mview^-1 * MmodelView
+        mModel = mult(inverse(mView), modelView()); // Mview^-1 * MmodelView
         gl.uniform4f(fColor, 0.5, 0.0, 0, 1.0); 
 
         multScale([0.25, 2, 0.4]);
@@ -401,14 +398,14 @@ function setup(shaders)
 
     function bumpers(){
         pushMatrix();
-            multTranslation([0.25+(BODY_LENGTH/2), BODY_ELEVATION, 0]);
+            multTranslation([ 0.25 + BODY_LENGTH/2, BODY_ELEVATION, 0]);
             multRotationZ(-90);
             multScale([BODY_HEIGHT, 0.5, BODY_WIDTH]);
             bumper();
         popMatrix();
 
         pushMatrix();
-            multTranslation([-0.25-(BODY_LENGTH/2), BODY_ELEVATION, 0]);
+            multTranslation([-0.25 - BODY_LENGTH/2, BODY_ELEVATION, 0]);
             multRotationZ(90);
             multScale([BODY_HEIGHT, 0.5, BODY_WIDTH]);
             bumper();
@@ -468,9 +465,8 @@ function setup(shaders)
     }
 
     function fire(){
-        console.log(time - lastFiredTime);
         if((time - lastFiredTime) >= 1) { // so that is a cooldown between bullets fired
-            projectilesArray.push([currentSuppressorMModel, DEFAULT_CANNON_ROTATION+hatchZRotation, hatchYRotation, time]);
+            projectilesArray.push([mModel, DEFAULT_CANNON_ROTATION + hatchZRotation, hatchYRotation, time]);
             lastFiredTime = time;
         }
     }
