@@ -242,9 +242,13 @@ function setup(shaders)
         
             multTranslation([0 , 0, -WHEELS_Z_DISTANCE / 2]);
             for(let i = 0; i < 2; i++){
-                multRotationZ(wheelsRotation);
-                tire();
-                rim();
+                pushMatrix();
+                    multRotationZ(wheelsRotation);
+                    uploadModelView()
+                    tire();
+                    rim();
+                popMatrix();
+                
                 (i==0)? wheelArmor(-90, 0) : wheelArmor(90, 0);
                 multTranslation([0, 0, WHEELS_Z_DISTANCE]);
             }
@@ -258,7 +262,7 @@ function setup(shaders)
 
         pushMatrix();
             multTranslation([0, 0, displacement]);
-            
+            (angle < 0) ? multRotationZ(wheelsRotation) : multRotationZ(-wheelsRotation);
             multScale([(0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, (0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, 0.3]);
             multRotationX(angle);
             uploadModelView();
@@ -400,16 +404,16 @@ function setup(shaders)
 
     function bumpers(){
         pushMatrix();
-            multTranslation([0.5+(BODY_LENGTH/2), BODY_ELEVATION, 0]);
+            multTranslation([0.25+(BODY_LENGTH/2), BODY_ELEVATION, 0]);
             multRotationZ(-90);
-            multScale([BODY_HEIGHT, 1, BODY_WIDTH]);
+            multScale([BODY_HEIGHT, 0.5, BODY_WIDTH]);
             bumper();
         popMatrix();
 
         pushMatrix();
-            multTranslation([-0.5-(BODY_LENGTH/2), BODY_ELEVATION, 0]);
+            multTranslation([-0.25-(BODY_LENGTH/2), BODY_ELEVATION, 0]);
             multRotationZ(90);
-            multScale([BODY_HEIGHT, 1, BODY_WIDTH]);
+            multScale([BODY_HEIGHT, 0.5, BODY_WIDTH]);
             bumper();
         popMatrix()
     }
@@ -437,6 +441,7 @@ function setup(shaders)
             multTranslation([0, 0.5, 0]);
             multScale([1, 2, 1]);
             uploadModelView();
+            gl.uniform4f(fColor, 0.72, 0.53, 0.04, 1.0);
             SPHERE.draw(gl, program, mode);
 
         popMatrix();
