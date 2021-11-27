@@ -249,7 +249,7 @@ function setup(shaders)
                     rim();
                 popMatrix();
                 
-                (i==0)? wheelArmor(-90, 0) : wheelArmor(90, 0);
+                (i==0)? wheelArmor(-90, -0.27) : wheelArmor(90, 0.27);
                 multTranslation([0, 0, WHEELS_Z_DISTANCE]);
             }
 
@@ -263,7 +263,7 @@ function setup(shaders)
         pushMatrix();
             multTranslation([0, 0, displacement]);
             (angle < 0) ? multRotationZ(wheelsRotation) : multRotationZ(-wheelsRotation);
-            multScale([(0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, (0.6/1.4) * (WHEEL_RADIUS-0.05) * 2, 0.3]);
+            multScale([(0.6/1.4) * (WHEEL_RADIUS-0.12) * 2, (0.6/1.4) * (WHEEL_RADIUS-0.12) * 2, 0.3]);
             multRotationX(angle);
             uploadModelView();
             PYRAMID.draw(gl, program, mode);
