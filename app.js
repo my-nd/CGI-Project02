@@ -30,7 +30,7 @@ const N_TILES_PER_SIDE = 20;
 
 //Body
 const BODY_HEIGHT = 1;
-const BODY_LENGTH = 7;
+const BODY_LENGTH = 4;
 const BODY_WIDTH = 2;
 
 
@@ -38,17 +38,26 @@ const BODY_WIDTH = 2;
 const WHEEL_RADIUS = 0.4;
 const BODY_ELEVATION = WHEEL_RADIUS * 1.7;
 
-const WHEEL_WIDTH = WHEEL_RADIUS*0.5;
-const WHEELS_X_DISTANCE = BODY_LENGTH/4;
+const WHEEL_WIDTH = WHEEL_RADIUS * 0.5;
+const WHEELS_X_DISTANCE = BODY_LENGTH / 4;
 const WHEELS_Z_DISTANCE = BODY_WIDTH + WHEEL_WIDTH;
 
 
 
 //Hatch
 const HATCH_HEIGHT = BODY_HEIGHT;   
-
 const DEFAULT_CANNON_ROTATION = -45;
 
+//Cannon 
+
+const CANNON_LENGTH = 1.5  *BODY_LENGTH;
+const CANNON_TRANSLATION = 0.15 * CANNON_LENGTH;
+const CANNON_RADIUS = 0.02 * CANNON_LENGTH;
+
+//Suppressor
+const SUPPRESSOR_TRANSLATION = 0.4 * BODY_LENGTH;
+const SUPPRESSOR_LENGTH = 0.2 * CANNON_LENGTH;
+const SUPPRESSOR_RADIUS = 1.2 * CANNON_RADIUS;
 
 
 //g
@@ -345,7 +354,6 @@ function setup(shaders)
             gl.uniform4f(fColor, 0, 0.4, 0, 1.0); 
             multTranslation([0, BODY_ELEVATION + HATCH_HEIGHT/2, 0]);
             multRotationY(hatchYRotation);
-
             hatch();
             cannon();
         popMatrix()
@@ -359,56 +367,46 @@ function setup(shaders)
         pushMatrix();
             multRotationZ(hatchZRotation);
             pushMatrix();
-                multTranslation([1.2, 1.2 , 0]);
+                multTranslation([CANNON_TRANSLATION, CANNON_TRANSLATION, 0]);
                 multRotationZ(DEFAULT_CANNON_ROTATION);
-                multScale([0.2, 9, 0.2]);
+                multScale([CANNON_RADIUS, CANNON_LENGTH, CANNON_RADIUS]);
                 uploadModelView();
                 TORUS.draw(gl, program, mode);  
             popMatrix();
             supressor();
-        popMatrix();
-        
-        
+        popMatrix();        
     }
 
 
     function supressor(){
+        gl.uniform4f(fColor, 0.5, 0.0, 0, 1.0);
         pushMatrix();
-        
-        multTranslation([2.45, 2.45, 0]);
-        multRotationZ(DEFAULT_CANNON_ROTATION);
-        uploadModelView();
-        mModel = mult(inverse(mView), modelView()); // Mview^-1 * MmodelView
-        gl.uniform4f(fColor, 0.5, 0.0, 0, 1.0); 
-
-        multScale([0.25, 2, 0.4]);
-        uploadModelView();
-        TORUS.draw(gl, program, mode);
-
+            multTranslation([SUPPRESSOR_TRANSLATION, SUPPRESSOR_TRANSLATION, 0]);
+            multRotationZ(DEFAULT_CANNON_ROTATION);
+            mModel = mult(inverse(mView), modelView()); // Mview^-1 * MmodelView
+            
+            multScale([SUPPRESSOR_RADIUS, SUPPRESSOR_LENGTH, SUPPRESSOR_RADIUS]);
+            uploadModelView();
+            TORUS.draw(gl, program, mode);
         popMatrix();
-
     }
 
 
-    function bumper(){
+function bumper(displacement, angle){
         gl.uniform4f(fColor, 0.0, 0.35, 0.0, 1.0);
+        multTranslation([displacement, BODY_ELEVATION, 0]);
+        multRotationZ(angle);
+        multScale([BODY_HEIGHT, 0.5, BODY_WIDTH])
         uploadModelView();
         PYRAMID.draw(gl, program, mode);
     }
 
     function bumpers(){
         pushMatrix();
-            multTranslation([ 0.25 + BODY_LENGTH/2, BODY_ELEVATION, 0]);
-            multRotationZ(-90);
-            multScale([BODY_HEIGHT, 0.5, BODY_WIDTH]);
-            bumper();
-        popMatrix();
-
+            bumper(-0.25 - BODY_LENGTH/2, 90);
+        popMatrix()
         pushMatrix();
-            multTranslation([-0.25 - BODY_LENGTH/2, BODY_ELEVATION, 0]);
-            multRotationZ(90);
-            multScale([BODY_HEIGHT, 0.5, BODY_WIDTH]);
-            bumper();
+            bumper(0.25 + BODY_LENGTH/2, -90);
         popMatrix()
     }
 
@@ -426,7 +424,6 @@ function setup(shaders)
         pushMatrix();
             multRotationY(angleY);
             multRotationZ(angleZ);
-           
             
             multScale([0.15, 0.3, 0.15]);
             uploadModelView();
