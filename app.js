@@ -250,7 +250,7 @@ function setup(shaders)
                     multRotationZ(wheelsRotation);
                     tire();
                     rim();
-                popMatrix();
+                popMatrix();    
                 
                 (i==0)? wheelArmor(-90, -0.27) : wheelArmor(90, 0.27);
                 multTranslation([0, 0, WHEELS_Z_DISTANCE]);
@@ -314,11 +314,11 @@ function setup(shaders)
         gl.uniform4f(fColor, 0.4, 0.4, 0.4, 1.0);
         pushMatrix();
 
-        multRotationX(90);
-        multRotationY(wheelsRotation);
-        multScale([0.1, WHEELS_Z_DISTANCE, 0.1]);
-        uploadModelView();
-        CYLINDER.draw(gl, program, mode);
+            multRotationX(90);
+            multRotationY(wheelsRotation);
+            multScale([0.1, WHEELS_Z_DISTANCE, 0.1]);
+            uploadModelView();
+            CYLINDER.draw(gl, program, mode);
 
         popMatrix();
     }
@@ -421,7 +421,6 @@ function bumper(displacement, angle){
 
     function projectile(angleZ, angleY, bulletRotation){
         gl.uniform4f(fColor, 0.80, 0.64, 0.00, 1.0);
-        pushMatrix();
             multRotationY(angleY);
             multRotationZ(angleZ);
             
@@ -434,8 +433,6 @@ function bumper(displacement, angle){
             uploadModelView();
             gl.uniform4f(fColor, 0.72, 0.53, 0.04, 1.0);
             SPHERE.draw(gl, program, mode);
-
-        popMatrix();
     }
 
     function projectiles(){
@@ -462,7 +459,7 @@ function bumper(displacement, angle){
     }
 
     function fire(){
-        if((time - lastFiredTime) >= 1) { // so that is a cooldown between bullets fired
+        if((time - lastFiredTime) >= 1) { // so that there is a cooldown between bullets fired
             projectilesArray.push([mModel, DEFAULT_CANNON_ROTATION + hatchZRotation, hatchYRotation, time]);
             lastFiredTime = time;
         }
