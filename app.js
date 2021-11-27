@@ -15,7 +15,7 @@ let gl;
 let time = 0;           // Global simulation time in days
 let speed = 1/60.0;     // Speed (how many days added to time on each render pass
 let mode;               // Drawing mode (gl.LINES or gl.TRIANGLES)
-let animation = true;   // Animation is running
+let lastFiredTime = -10000;
 
 let mView;
 
@@ -57,7 +57,7 @@ let hatchZRotation = 0;
 let hatchYRotation = 0;
 
 //Bullet 
-const v0 = 15;
+const v0 = 20;
 let a = vec4(0,-9.8,0,0);
 let bulletRotation = 10/v0;
 
@@ -102,9 +102,6 @@ function setup(shaders)
                 break;
             case 'S':
                 mode = gl.TRIANGLES;
-                break;
-            case 'p':
-                animation = !animation;
                 break;
             case '1':
                 camX = -VP_DISTANCE;
@@ -466,14 +463,18 @@ function setup(shaders)
             pushMatrix();
                 multTranslation([pos[0], pos[1], pos[2]]);
                 projectile(projectilesArray[i][1], projectilesArray[i][2]);
-                projectilesArray[i][1] -= bulletRotation ;
+                if (projectilesArray[i][1] > -180) projectilesArray[i][1] -= bulletRotation ;
                 
             popMatrix();
         }   
     }
 
     function fire(){
-        projectilesArray.push([currentSuppressorMModel, DEFAULT_CANNON_ROTATION+hatchZRotation, hatchYRotation, time]);
+        console.log(time - lastFiredTime);
+        if((time - lastFiredTime) >= 1) { // so that is a cooldown between bullets fired
+            projectilesArray.push([currentSuppressorMModel, DEFAULT_CANNON_ROTATION+hatchZRotation, hatchYRotation, time]);
+            lastFiredTime = time;
+        }
     }
 
 
