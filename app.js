@@ -45,6 +45,7 @@ const BODY_ELEVATION = WHEEL_RADIUS * 1.7;
 //Hatch
 const HATCH_CENTER_X = -WHEELS_X_DISTANCE + 0.2;
 const HATCH_CENTER_Y = BODY_ELEVATION + 0.5;    
+const DEFAULT_CANNON_ROTATION = -45;
 
 
 //g
@@ -57,7 +58,7 @@ let hatchYRotation = 0;
 
 //Bullet variables
 let v0 = 10;
-let a = vec4(0,-9.8,0,1);
+let a = vec4(0,-9.8,0,0);
 
 let projectilesArray = [];
 
@@ -65,7 +66,7 @@ let projectilesArray = [];
 
 
 
-const VP_DISTANCE = 6;
+let VP_DISTANCE = 6;
 let camX = VP_DISTANCE, camY = VP_DISTANCE, camZ = VP_DISTANCE;
 let upZ = 0;
 
@@ -104,12 +105,6 @@ function setup(shaders)
             case 'p':
                 animation = !animation;
                 break;
-            case '+':
-                if(animation) speed *= 1.1;
-                break;
-            case '-':
-                if(animation) speed /= 1.1;
-                break;
             case '1':
                 camX = -VP_DISTANCE;
                 camY = 0;
@@ -136,11 +131,11 @@ function setup(shaders)
                 break;
             case "ArrowUp":
                 tankXTranslation -= 0.05;
-                wheelsRotation += (360*0.05) / (2*Math.PI * WHEEL_RADIUS);
+                wheelsRotation += (3600.05) / (2*Math.PI * WHEEL_RADIUS);
                 break;
             case "ArrowDown":
                 tankXTranslation += 0.05;
-                wheelsRotation -= (360*0.05) / (2*Math.PI * WHEEL_RADIUS);
+                wheelsRotation -= (3600.05) / (2*Math.PI * WHEEL_RADIUS);
                 break;
             case "w":
                 if(hatchZRotation <= 44)
@@ -158,6 +153,12 @@ function setup(shaders)
                 break;
             case " ":
                 fire();
+                break;
+            case "+":
+                VP_DISTANCE -= 1;
+                break;
+            case "-":
+                VP_DISTANCE += 1;
                 break;
         }
     }
@@ -360,10 +361,11 @@ function setup(shaders)
             uploadModelView();
             pushMatrix();
                 multTranslation([1.2, 1.2 , 0]);
-                multRotationZ(-45);
+                multRotationZ(DEFAULT_CANNON_ROTATION);
                 multScale([0.2, 9, 0.2]);
                 uploadModelView();
                 TORUS.draw(gl, program, mode);
+                
             popMatrix();
             supressor();
         popMatrix();
@@ -374,13 +376,11 @@ function setup(shaders)
 
     function supressor(){
         pushMatrix();
-
+        
         multTranslation([2.45, 2.45, 0]);
-
-        multRotationZ(-45);
+        multRotationZ(DEFAULT_CANNON_ROTATION);
         uploadModelView();
-        currentSuppressorMModel = mult(inverse(mView), modelView()); // Mview^-1 * Mmodelview
-        //projectiles();
+        currentSuppressorMModel = mult(inverse(mView), modelView()); // Mview^-1 * MmodelView
         gl.uniform4f(fColor, 0.5, 0.0, 0, 1.0); 
 
         multScale([0.25, 2, 0.4]);
@@ -423,15 +423,19 @@ function setup(shaders)
         popMatrix();
     }
 
-    function projectile(){
-        gl.uniform4f(fColor, 0.0, 0.0, 1.0, 1.0);
+    function projectile(angleZ, angleY, bulletRotation){
+        gl.uniform4f(fColor, 1.00, 0.84, 0.00, 1.0);
         pushMatrix();
+            multRotationY(angleY);
+            multRotationZ(angleZ);
+           
+            
             multScale([0.15, 0.3, 0.15]);
             uploadModelView();
             CYLINDER.draw(gl, program, mode);
 
             multTranslation([0, 0.5, 0]);
-            multScale([1, 2 , 1]);
+            multScale([1, 2, 1]);
             uploadModelView();
             SPHERE.draw(gl, program, mode);
 
@@ -445,21 +449,25 @@ function setup(shaders)
             let initialPos = mult(projectilesArray[i][0],vec4(0,0,0,1));
             let initialVel = mult(normalMatrix(projectilesArray[i][0]),vec4(0,v0,0,0));
 
-            let t = time - projectilesArray[i][2];
+            let t = time - projectilesArray[i][3];
             
             let pos = add(add(initialPos, scale(t,initialVel)), scale(0.5,scale(Math.pow(t,2),a)));
             
             if (pos[1] < 0) continue;
 
+
             pushMatrix();
                 multTranslation([pos[0], pos[1], pos[2]]);
-                projectile();
+                //let bulletRotation = Math.atan2(pos[0], pos[1]);
+                projectile(projectilesArray[i][1], projectilesArray[i][2]);
+                projectilesArray[i][1] -= 1 ;
+                
             popMatrix();
         }   
     }
 
     function fire(){
-        projectilesArray.push([currentSuppressorMModel, -45+hatchZRotation, time]);
+        projectilesArray.push([currentSuppressorMModel, DEFAULT_CANNON_ROTATION+hatchZRotation, hatchYRotation, time]);
     }
 
 
@@ -467,16 +475,18 @@ function setup(shaders)
     {
         time += speed;
         window.requestAnimationFrame(render);
+        mProjection = ortho(-VP_DISTANCE*aspect,VP_DISTANCE*aspect, -VP_DISTANCE, VP_DISTANCE,-3*VP_DISTANCE,3*VP_DISTANCE);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        
+
         gl.useProgram(program);
-        
+
+
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
-    
+
         mView = lookAt([camX, camY, camZ], [0,0,0], [0,1,upZ]);
         loadMatrix(mView);
-        
+
 
         ground(); 
         tank();
