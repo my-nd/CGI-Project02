@@ -429,7 +429,7 @@ function setup(shaders)
     }
 
     function projectile(angleZ, angleY, bulletRotation){
-        gl.uniform4f(fColor, 1.00, 0.84, 0.00, 1.0);
+        gl.uniform4f(fColor, 0.80, 0.64, 0.00, 1.0);
         pushMatrix();
             multRotationY(angleY);
             multRotationZ(angleZ);
