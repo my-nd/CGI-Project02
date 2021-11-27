@@ -28,6 +28,7 @@ const SQUARE_LENGTH = 0.5;
 const GROUND_X = 10;
 const GROUND_Z = 10;
 const GROUND_WIDTH = 0.1;
+const N_TILES_PER_SIDE = 20;
 
 //Wheels
 const WHEEL_RADIUS = 0.4;
@@ -57,9 +58,9 @@ let hatchZRotation = 0;
 let hatchYRotation = 0;
 
 //Bullet 
-const v0 = 20;
-let a = vec4(0,-9.8,0,0);
-let bulletRotation = 10/v0;
+const VELOCITY = 20;
+const A = vec4(0,-9.8,0,0);
+let bulletRotation = 10/VELOCITY;
 
 let projectilesArray = [];
 
@@ -199,23 +200,20 @@ function setup(shaders)
         popMatrix();
     }
 
-    function ground(){
-        pushMatrix();
-
-        multTranslation([-GROUND_X, -GROUND_WIDTH/2, -GROUND_Z]);  
-
-        for(let z = 0; z < 2*GROUND_Z/SQUARE_LENGTH; z++){
-            pushMatrix();   
-            for(let x = 0; x < 2*GROUND_X/SQUARE_LENGTH; x++){
-                ((z+x)%2 == 0) ? gl.uniform4f(fColor, 0.390625, 0.2734375, 0.140625, 1.0) : gl.uniform4f(fColor, 0.5, 0.3515625, 0.2734375, 1.0);
-                tile();
-                multTranslation([SQUARE_LENGTH, 0, 0]);
+    function ground(){ 
+        for(let z = 0; z < N_TILES_PER_SIDE; z++){
+            for(let x = 0; x < N_TILES_PER_SIDE; x++){
+                pushMatrix();
+                    multTranslation([((-N_TILES_PER_SIDE/2) + (x+0.5)) * SQUARE_LENGTH, 
+                    -GROUND_WIDTH/2, ((-N_TILES_PER_SIDE/2) + (z+0.5)) * SQUARE_LENGTH]);
+                    ((z+x)%2 == 0) ? gl.uniform4f(fColor, 0.390625, 0.2734375, 0.140625, 1.0) : gl.uniform4f(fColor, 0.5, 0.3515625, 0.2734375, 1.0);
+                    tile();
+                popMatrix();
             }
-            popMatrix();
-            multTranslation([0, 0, SQUARE_LENGTH]); 
         }
-        popMatrix();
     }
+
+
     
 
     function wheelsAndAxles(){
@@ -451,11 +449,11 @@ function setup(shaders)
         for(let i = 0; i < projectilesArray.length; i++){
 
             let initialPos = mult(projectilesArray[i][0],vec4(0,0,0,1));
-            let initialVel = mult(normalMatrix(projectilesArray[i][0]),vec4(0,v0,0,0));
+            let initialVel = mult(normalMatrix(projectilesArray[i][0]),vec4(0,VELOCITY,0,0));
 
             let t = time - projectilesArray[i][3];
             
-            let pos = add(add(initialPos, scale(t,initialVel)), scale(0.5,scale(Math.pow(t,2),a)));
+            let pos = add(add(initialPos, scale(t,initialVel)), scale(0.5,scale(Math.pow(t,2),A)));
             
             if (pos[1] < 0) continue;
 
