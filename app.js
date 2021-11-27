@@ -56,9 +56,10 @@ let wheelsRotation = 0;
 let hatchZRotation = 0;
 let hatchYRotation = 0;
 
-//Bullet variables
-let v0 = 10;
+//Bullet 
+const v0 = 15;
 let a = vec4(0,-9.8,0,0);
+let bulletRotation = 10/v0;
 
 let projectilesArray = [];
 
@@ -464,9 +465,8 @@ function setup(shaders)
 
             pushMatrix();
                 multTranslation([pos[0], pos[1], pos[2]]);
-                //let bulletRotation = Math.atan2(pos[0], pos[1]);
                 projectile(projectilesArray[i][1], projectilesArray[i][2]);
-                projectilesArray[i][1] -= 1 ;
+                projectilesArray[i][1] -= bulletRotation ;
                 
             popMatrix();
         }   
