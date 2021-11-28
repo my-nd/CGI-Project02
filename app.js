@@ -43,15 +43,14 @@ const WHEELS_X_DISTANCE = BODY_LENGTH / 4;
 const WHEELS_Z_DISTANCE = BODY_WIDTH + WHEEL_WIDTH;
 
 
-
 //Hatch
 const HATCH_HEIGHT = BODY_HEIGHT;   
-const DEFAULT_CANNON_ROTATION = -45;
 
 //Cannon 
 
 const CANNON_LENGTH = 1.5  *BODY_LENGTH;
 const CANNON_TRANSLATION = 0.15 * CANNON_LENGTH;
+const DEFAULT_CANNON_ROTATION = -45;
 const CANNON_RADIUS = 0.02 * CANNON_LENGTH;
 
 //Suppressor
@@ -60,7 +59,7 @@ const SUPPRESSOR_LENGTH = 0.2 * CANNON_LENGTH;
 const SUPPRESSOR_RADIUS = 1.2 * CANNON_RADIUS;
 
 
-//g
+//Movement
 let tankXTranslation = 0;
 let wheelsRotation = 0;
 
@@ -69,7 +68,7 @@ let hatchZRotation = 0;
 let hatchYRotation = 0;
 
 //Bullet 
-const VELOCITY = 20;
+const VELOCITY = 2;
 const A = vec4(0,-9.8,0,0);
 let bulletRotation = 10/VELOCITY;
 
@@ -419,7 +418,7 @@ function bumper(displacement, angle){
         popMatrix();
     }
 
-    function projectile(angleZ, angleY, bulletRotation){
+    function projectile(angleZ, angleY){
         gl.uniform4f(fColor, 0.80, 0.64, 0.00, 1.0);
             multRotationY(angleY);
             multRotationZ(angleZ);
