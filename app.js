@@ -85,8 +85,6 @@ let projectilesArray = [];
 
 
 let VP_DISTANCE = 6;
-let camX = VP_DISTANCE, camY = VP_DISTANCE, camZ = VP_DISTANCE;
-let upZ = 0;
 
 let mModel;
 
@@ -107,6 +105,9 @@ function setup(shaders)
 
     mode = gl.LINES; 
 
+    mView = lookAt([VP_DISTANCE, VP_DISTANCE, VP_DISTANCE], [0,0,0], [0,1,0]);
+    loadMatrix(mView);
+
     const fColor = gl.getUniformLocation(program, "fColor");
 
     resize_canvas();
@@ -121,36 +122,28 @@ function setup(shaders)
                 mode = gl.TRIANGLES;
                 break;
             case '1':
-                camX = -VP_DISTANCE;
-                camY = 0;
-                camZ = 0;
-                upZ = 0;
+                mView = lookAt([VP_DISTANCE, 0, 0], [0,0,0], [0,1,0]);
+                loadMatrix(mView);
                 break;
             case '2':
-                camX = 0;
-                camY = VP_DISTANCE;
-                camZ = 0;
-                upZ = 1;
+                mView = lookAt([0, VP_DISTANCE, 0], [0,0,0], [-1,1,0]);
+                loadMatrix(mView);
                 break;
             case '3':
-                camX = 0;
-                camY = 0;
-                camZ = VP_DISTANCE;
-                upZ = 0;
+                mView = lookAt([0, 0, VP_DISTANCE], [0,0,0], [0,1,0]);
+                loadMatrix(mView);
                 break;
             case '4':
-                camX = VP_DISTANCE;
-                camY = VP_DISTANCE;
-                camZ = VP_DISTANCE;
-                upZ = 0;
+                mView = lookAt([VP_DISTANCE, VP_DISTANCE, VP_DISTANCE], [0,0,0], [0,1,0]);
+                loadMatrix(mView);
                 break;
             case "ArrowUp":
                 tankXTranslation += 0.05;
-                wheelsRotation += (360.0 * 0.05) / (2.0 * Math.PI * WHEEL_RADIUS);
+                wheelsRotation -= (360.0 * 0.05) / (2.0 * Math.PI * WHEEL_RADIUS);
                 break;
             case "ArrowDown":
                 tankXTranslation -= 0.05;
-                wheelsRotation -= (360.0 * 0.05) / (2.0 * Math.PI * WHEEL_RADIUS);
+                wheelsRotation += (360.0 * 0.05) / (2.0 * Math.PI * WHEEL_RADIUS);
                 break;
             case "w":
                 if(hatchZRotation <= 20)
@@ -186,6 +179,7 @@ function setup(shaders)
     PYRAMID.init(gl);
 
     gl.enable(gl.DEPTH_TEST);   // Enables Z-buffer depth test
+
     
     window.requestAnimationFrame(render);
 
@@ -252,7 +246,7 @@ function setup(shaders)
                     tire();
                     rim();
                 popMatrix();
-                (i==0)? wheelArmor(-90, -WHEEL_WIDTH/2) : wheelArmor(90, WHEEL_WIDTH/2); //alterada
+                (i==0)? wheelArmor(-90, -WHEEL_WIDTH/2) : wheelArmor(90, WHEEL_WIDTH/2);
             popMatrix();
         }
 }
@@ -264,7 +258,7 @@ function setup(shaders)
 
         pushMatrix();
             multTranslation([0, 0, displacement]);
-            (angle < 0) ? multRotationZ(wheelsRotation) : multRotationZ(-wheelsRotation);
+            multRotationZ(wheelsRotation);
             multScale([(0.6/1.4) * (WHEEL_RADIUS) * 2, (0.6/1.4) * (WHEEL_RADIUS) * 2, 0.3]);
             multRotationX(angle);
             uploadModelView();
@@ -482,11 +476,9 @@ function bumper(displacement, angle){
 
         gl.useProgram(program);
 
-
         gl.uniformMatrix4fv(gl.getUniformLocation(program, "mProjection"), false, flatten(mProjection));
 
-        mView = lookAt([camX, camY, camZ], [0,0,0], [0,1,upZ]);
-        loadMatrix(mView);
+        
 
 
         ground(); 
