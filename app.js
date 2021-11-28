@@ -228,35 +228,29 @@ function setup(shaders)
 
     function wheelsAndAxles(){
 
-        pushMatrix();
-            multTranslation([-1.5 * WHEELS_X_DISTANCE, WHEEL_RADIUS, 0]);            
-            for(let i = 0; i < 4; i++){
+        for(let i = 0; i < 4; i++){
+            pushMatrix(); 
+                multTranslation([-1.5 * WHEELS_X_DISTANCE + i*WHEELS_X_DISTANCE, WHEEL_RADIUS, 0]);
                 wheels();
                 axles();
-                multTranslation([WHEELS_X_DISTANCE, 0, 0]);
-            }
-
-        popMatrix();
+            popMatrix();
+        }
     }
 
     
     function wheels(){
-        pushMatrix();
-        
-            multTranslation([0 , 0, -WHEELS_Z_DISTANCE / 2]);
-            for(let i = 0; i < 2; i++){
+        for(let i = 0; i < 2; i++){ 
+            pushMatrix();
+                multTranslation([0 , 0, (i-0.5) * WHEELS_Z_DISTANCE])
                 pushMatrix();
                     multRotationZ(wheelsRotation);
                     tire();
                     rim();
-                popMatrix();    
-                
+                popMatrix();
                 (i==0)? wheelArmor(-90, -0.27) : wheelArmor(90, 0.27);
-                multTranslation([0, 0, WHEELS_Z_DISTANCE]);
-            }
-
-        popMatrix();
-    }
+            popMatrix();
+        }
+}
 
 
     function wheelArmor(angle, displacement) {
@@ -458,7 +452,7 @@ function bumper(displacement, angle){
     }
 
     function fire(){
-        if((time - lastFiredTime) >= 1) { // so that there is a cooldown between bullets fired
+        if((time - lastFiredTime) >= 0.5) { // so that there is a cooldown between bullets fired
             projectilesArray.push([mModel, DEFAULT_CANNON_ROTATION + hatchZRotation, hatchYRotation, time]);
             lastFiredTime = time;
         }
