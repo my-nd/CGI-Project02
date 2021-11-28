@@ -68,6 +68,8 @@ let hatchZRotation = 0;
 let hatchYRotation = 0;
 
 //Bullet 
+const BULLET_CYL_SIZE = 2 * SUPPRESSOR_RADIUS;
+const BULLET_SPHERE_SIZE = 3 * SUPPRESSOR_RADIUS;
 const VELOCITY = 15;
 const A = vec4(0,-9.8,0,0);
 let bulletRotation = 10/VELOCITY;
@@ -414,18 +416,25 @@ function bumper(displacement, angle){
 
     function projectile(angleZ, angleY){
         gl.uniform4f(fColor, 0.80, 0.64, 0.00, 1.0);
+        pushMatrix();
             multRotationY(angleY);
             multRotationZ(angleZ);
-            
-            multScale([0.15, 0.3, 0.15]);
-            uploadModelView();
-            CYLINDER.draw(gl, program, mode);
 
-            multTranslation([0, 0.5, 0]);
-            multScale([1, 2, 1]);
-            uploadModelView();
-            gl.uniform4f(fColor, 0.72, 0.53, 0.04, 1.0);
-            SPHERE.draw(gl, program, mode);
+            pushMatrix();
+                multScale([SUPPRESSOR_RADIUS, BULLET_CYL_SIZE, SUPPRESSOR_RADIUS]);
+                uploadModelView();
+                CYLINDER.draw(gl, program, mode);
+            popMatrix();
+
+            pushMatrix();
+                multTranslation([0, BULLET_CYL_SIZE/2, 0]);
+                multScale([SUPPRESSOR_RADIUS, BULLET_SPHERE_SIZE, SUPPRESSOR_RADIUS]);
+                uploadModelView();
+                gl.uniform4f(fColor, 0.72, 0.53, 0.04, 1.0);
+                SPHERE.draw(gl, program, mode);
+            popMatrix();
+
+        popMatrix();
     }
 
     function projectiles(){
