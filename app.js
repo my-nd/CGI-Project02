@@ -139,11 +139,11 @@ function setup(shaders)
                 break;
             case "ArrowUp":
                 tankXTranslation += 0.05;
-                wheelsRotation += (360.0 * 0.05) / (2.0 * Math.PI * WHEEL_RADIUS);
+                wheelsRotation -= (360.0 * 0.05) / (2.0 * Math.PI * WHEEL_RADIUS);
                 break;
             case "ArrowDown":
                 tankXTranslation -= 0.05;
-                wheelsRotation -= (360.0 * 0.05) / (2.0 * Math.PI * WHEEL_RADIUS);
+                wheelsRotation += (360.0 * 0.05) / (2.0 * Math.PI * WHEEL_RADIUS);
                 break;
             case "w":
                 if(hatchZRotation <= 20)
@@ -246,7 +246,7 @@ function setup(shaders)
                     tire();
                     rim();
                 popMatrix();
-                (i==0)? wheelArmor(-90, -WHEEL_WIDTH/2) : wheelArmor(90, WHEEL_WIDTH/2); //alterada
+                (i==0)? wheelArmor(-90, -WHEEL_WIDTH/2) : wheelArmor(90, WHEEL_WIDTH/2);
             popMatrix();
         }
 }
@@ -258,7 +258,7 @@ function setup(shaders)
 
         pushMatrix();
             multTranslation([0, 0, displacement]);
-            (angle < 0) ? multRotationZ(wheelsRotation) : multRotationZ(-wheelsRotation);
+            multRotationZ(wheelsRotation);
             multScale([(0.6/1.4) * (WHEEL_RADIUS) * 2, (0.6/1.4) * (WHEEL_RADIUS) * 2, 0.3]);
             multRotationX(angle);
             uploadModelView();
