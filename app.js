@@ -30,13 +30,16 @@ const N_TILES_PER_SIDE = 20;
 
 //Body
 const BODY_HEIGHT = 1;
-const BODY_LENGTH = 4;
+const BODY_LENGTH = 3.5;
 const BODY_WIDTH = 2;
+
+
+
 
 
 //Wheels
 const WHEEL_RADIUS = 0.4;
-const BODY_ELEVATION = WHEEL_RADIUS * 1.7;
+const BODY_ELEVATION = WHEEL_RADIUS + BODY_HEIGHT/2;
 
 const WHEEL_WIDTH = WHEEL_RADIUS * 0.5;
 const WHEELS_X_DISTANCE = BODY_LENGTH / 4;
@@ -48,7 +51,7 @@ const HATCH_HEIGHT = BODY_HEIGHT;
 
 //Cannon 
 
-const CANNON_LENGTH = 1.5  *BODY_LENGTH;
+const CANNON_LENGTH = 1.5 * BODY_LENGTH;
 const CANNON_TRANSLATION = 0.15 * CANNON_LENGTH;
 const DEFAULT_CANNON_ROTATION = -45;
 const CANNON_RADIUS = 0.02 * CANNON_LENGTH;
@@ -70,7 +73,8 @@ let hatchYRotation = 0;
 //Bullet 
 const BULLET_CYL_SIZE = 2 * SUPPRESSOR_RADIUS;
 const BULLET_SPHERE_SIZE = 3 * SUPPRESSOR_RADIUS;
-const VELOCITY = 15;
+
+const VELOCITY = 10;
 const A = vec4(0,-9.8,0,0);
 let bulletRotation = 10/VELOCITY;
 
@@ -141,15 +145,15 @@ function setup(shaders)
                 upZ = 0;
                 break;
             case "ArrowUp":
-                tankXTranslation -= 0.05;
-                wheelsRotation += (3600.05) / (2*Math.PI * WHEEL_RADIUS);
+                tankXTranslation += 0.05;
+                wheelsRotation += (360.0 * 0.05) / (2.0 * Math.PI * WHEEL_RADIUS);
                 break;
             case "ArrowDown":
-                tankXTranslation += 0.05;
-                wheelsRotation -= (3600.05) / (2*Math.PI * WHEEL_RADIUS);
+                tankXTranslation -= 0.05;
+                wheelsRotation -= (360.0 * 0.05) / (2.0 * Math.PI * WHEEL_RADIUS);
                 break;
             case "w":
-                if(hatchZRotation <= 44)
+                if(hatchZRotation <= 20)
                     hatchZRotation += 1;
                 break;
             case "s":
@@ -173,7 +177,6 @@ function setup(shaders)
                 break;
         }
     }
-
     gl.clearColor(0.71875, 0.83984375, 0.91015625, 1.0);
     
     SPHERE.init(gl);
@@ -249,10 +252,11 @@ function setup(shaders)
                     tire();
                     rim();
                 popMatrix();
-                (i==0)? wheelArmor(-90, -0.27) : wheelArmor(90, 0.27);
+                (i==0)? wheelArmor(-90, -WHEEL_WIDTH/2) : wheelArmor(90, WHEEL_WIDTH/2); //alterada
             popMatrix();
         }
 }
+
 
 
     function wheelArmor(angle, displacement) {
@@ -261,7 +265,7 @@ function setup(shaders)
         pushMatrix();
             multTranslation([0, 0, displacement]);
             (angle < 0) ? multRotationZ(wheelsRotation) : multRotationZ(-wheelsRotation);
-            multScale([(0.6/1.4) * (WHEEL_RADIUS-0.12) * 2, (0.6/1.4) * (WHEEL_RADIUS-0.12) * 2, 0.3]);
+            multScale([(0.6/1.4) * (WHEEL_RADIUS) * 2, (0.6/1.4) * (WHEEL_RADIUS) * 2, 0.3]);
             multRotationX(angle);
             uploadModelView();
             PYRAMID.draw(gl, program, mode);
