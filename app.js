@@ -68,7 +68,7 @@ let hatchZRotation = 0;
 let hatchYRotation = 0;
 
 //Bullet 
-const VELOCITY = 2;
+const VELOCITY = 15;
 const A = vec4(0,-9.8,0,0);
 let bulletRotation = 10/VELOCITY;
 
